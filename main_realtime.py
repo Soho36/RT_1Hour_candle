@@ -1,11 +1,10 @@
 import time
 import os
 import pandas as pd
-from data_handling_realtime import (get_dataframe_from_file, get_levels_from_file, leave_only_last_line,
-                                    remove_expired_levels, get_last_order_time_from_file, read_chart_levels,
-                                    read_price_levels, append_new_levels)
-from price_levels_manual_realtime import process_levels
-from signals_with_ob_short_long_realtime import level_rejection_signals
+from data_handling_realtime import (get_dataframe_from_file,
+                                    leave_only_last_line,
+                                    get_last_order_time_from_file)
+from signals_with_ob_short_long_realtime import hourly_engulf_signals
 from orders_sender import last_candle_ohlc, send_buy_sell_orders
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -21,7 +20,6 @@ stop_loss_offset = 1                # Is added to SL for Shorts and subtracted f
 
 # hardcoded_sr_levels = [('2024-11-02 16:19:00', 69245.00), ('2024-11-02 16:19:00', 69167.00)]  # Example support levels
 ob_candle_size = 30
-level_interactions_threshold = 3    # Times
 max_time_waiting_for_entry = 40     # Minutes
 
 level_lifetime_minutes = 60   # Minutes after interaction
@@ -82,22 +80,6 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
     # print('\nget_dataframe_from_file: \n', dataframe_from_log[-10:])
     # print('last_date!!!!!', last_datetime_of_df)
 
-    # GET LEVELS FROM FILE
-    hardcoded_sr_levels = get_levels_from_file(last_datetime_of_df, valid_levels_path)
-    # print('hardcoded_sr_levels from file: \n', hardcoded_sr_levels)
-
-    # PRICE LEVELS
-    (
-        levels_startpoints_to_chart,
-        levels_endpoints_to_chart,
-        level_discovery_signals_series_out,
-        sr_levels,
-        output_df_with_levels
-    ) = process_levels(
-        dataframe_from_log,
-        hardcoded_sr_levels
-    )
-    print('\noutput_df_with_levels2: \n', output_df_with_levels)  # [-10:]
     # SIGNALS
     (
         over_under_counter,
@@ -108,43 +90,13 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
         candle_counter,
         s_time,
         signals_counter
-    ) = level_rejection_signals(
-        output_df_with_levels,
-        sr_levels,
-        level_interactions_threshold,
+    ) = hourly_engulf_signals(
+        dataframe_from_log,
         max_time_waiting_for_entry,
         ob_candle_size
     )
 
     print(f'\nCandles processed since start: {candle_counter}')
-
-    # Remove the level which has been hit threshold
-    remove_expired_levels(level_lifetime_minutes, dataframe_from_log, interacted_levels, valid_levels_path, expired_levels_path)
-
-    chart_levels = read_chart_levels(nt8_levels_path)
-    valid_levels = read_price_levels(valid_levels_path)
-    expired_levels = read_price_levels(expired_levels_path)
-
-    # Find new levels (in chart_levels but not in expired_levels)
-
-    new_levels = chart_levels - expired_levels - valid_levels
-
-    # Append new levels to the Python levels file
-
-    append_new_levels(valid_levels_path, new_levels)
-    print(f"New levels added: {new_levels}")
-
-    # print("New levels added to the Python script file.")
-
-    # LAST CANDLE OHLC (current OHLC)
-    (
-        last_candle_high,
-        last_candle_low,
-        last_candle_close,
-        ticker
-     ) = last_candle_ohlc(
-        output_df_with_levels
-    )
 
     last_order_timestamp = get_last_order_time_from_file()
 

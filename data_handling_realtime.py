@@ -12,13 +12,6 @@ mt5_account_number = 828    # LAST 3 DIGITS OF MT5 ACCOUNT. MUST BE CHANGED BEFO
 
 # MT5 directory with OHLC log file (logging on active timeframe):
 
-# ------------------------
-# LIIKURI PATHS # HASH FOLDER MUST BE CHANGED BEFORE EXE BUILD
-# mt5_logging_file_path = (
-#     f'C:\\Users\\Liikurserv\\AppData\\Roaming\\MetaQuotes\\Terminal\\09FF355D73768D9CE6BDD4EE575EAB09\\MQL5\\Files\\'
-#     f'OHLCVData_{mt5_account_number}.csv'
-# )
-
 # OHLC saved by NT8
 nt8_logging_file_path = f'C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\OHLCVData_1.csv'
 
