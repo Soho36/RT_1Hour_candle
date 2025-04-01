@@ -27,11 +27,6 @@ nt8_buy_sell_signals_for_path = (
      f'C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\trade_signal.txt'
      )
 
-# Levels PATH for NinjaTrader:
-# levels_path = (
-#     f'C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\hardcoded_sr_levels.csv'
-# )
-
 list_of_orders_path = 'C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\list_of_orders.csv'
 
 position_state_longs_path = 'position_state_longs.txt'
@@ -70,111 +65,6 @@ def get_dataframe_from_file(max_time_waiting_for_entry):
     last_date = str(datetime_index[-1])     # Get datetime of the first row of dataframe to pass along with levels
 
     return dataframe_from_log, last_date
-
-
-def get_levels_from_file(last_datetime_of_df, valid_levels_path):
-    updated_lines = []
-    levels = []
-
-    with open(valid_levels_path, 'r', encoding='utf-8') as file:
-        for line in file:
-            parts = line.strip().split(',')
-
-            if len(parts) == 2:
-                # Properly formatted line
-                # line_key = parts[0].strip()
-                timestamp = parts[0].strip()
-                level = float(parts[1].strip())
-
-            else:
-                # line_key = parts[0].strip()
-                timestamp = last_datetime_of_df
-                level = float(parts[0].strip())
-
-            # Add the formatted line to the update list
-            updated_lines.append(f"{timestamp}, {level}\n")
-            levels.append((timestamp, level))
-
-    # Rewrite the file with only properly formatted lines
-    with open(valid_levels_path, 'w', encoding='utf-8') as file:
-        file.writelines(updated_lines)
-
-    return levels
-
-
-#   Remove level which has reached time threshold from file
-def remove_expired_levels(level_lifetime_minutes, dataframe_from_log, interacted_levels, valid_levels_path, expired_levels_path):
-    curr_time = dataframe_from_log.index[-1]  # Timestamp of the last line of dataframe
-    updated_levels = []
-    expired_levels = []
-    print('\nLevels management:')
-    print('interacted_levels', interacted_levels)
-    print(f'level_lifetime_minutes: {level_lifetime_minutes} minutes\n')
-    with open(valid_levels_path, 'r', encoding='utf-8') as file:
-        for line in file:
-            timestamp_str, file_level = line.strip().split(',')  # Get timestamp and level from file
-            file_level = float(file_level.strip())
-
-            # Flag to check if the level is still valid
-            level_still_valid = False
-
-            for interaction_time, level in interacted_levels:
-                if level == file_level:  # Match the file level with interacted level
-                    # Calculate the time difference
-                    time_diff = (curr_time - pd.to_datetime(interaction_time)).total_seconds() / 60  # Convert to minutes
-                    print(f"Level {level}: Time difference {time_diff:.2f} minutes")
-
-                    if time_diff < level_lifetime_minutes:
-                        level_still_valid = True  # Mark as valid
-                        break  # No need to check other interactions for the same level
-
-            # Add the level back if it’s still valid or hasn’t been interacted with
-            if level_still_valid or all(file_level != lvl for _, lvl in interacted_levels):
-                updated_levels.append(line)
-            else:
-                print(f"Removing expired level: {timestamp_str}, {file_level}")
-                expired_levels.append(line)
-                with open(expired_levels_path, 'a', encoding='utf-8') as file:
-                    file.writelines(expired_levels)
-
-    # Write the remaining levels back to the file
-    with open(valid_levels_path, 'w', encoding='utf-8') as file:
-        file.writelines(updated_levels)
-
-
-# Function to read levels from NT8 chart levels
-def read_chart_levels(file_path):
-    levels = set()
-    with open(file_path, 'r') as file:
-        for line in file:
-            # Extract price after the comma
-            try:
-                price = float(line.split(',')[-1].strip())
-                levels.add(price)
-            except ValueError:
-                print(f"Invalid line in chart levels file: {line}")
-    return levels
-
-
-# Function to read prices from valid levels and expired levels
-def read_price_levels(file_path):
-    levels = set()
-    with open(file_path, 'r') as file:
-        for line in file:
-            # Extract price after the comma
-            try:
-                price = float(line.split(',')[1].strip())
-                levels.add(price)
-            except (IndexError, ValueError):
-                print(f"Invalid line in file: {line}")
-    return levels
-
-
-# Function to append new levels to the valid levels file
-def append_new_levels(file_path, new_levels):
-    with open(file_path, 'a') as file:
-        for level in new_levels:
-            file.write(f"{level}\n")
 
 
 # Tracks if there is an open position
