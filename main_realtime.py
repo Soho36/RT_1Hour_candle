@@ -82,11 +82,9 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
 
     # SIGNALS
     (
-        over_under_counter,
         s_signal,               # signal 100 or -100
         n_index,                # index
         stop_market_price,      # stop-market order price
-        interacted_levels,
         candle_counter,
         s_time,
         signals_counter
