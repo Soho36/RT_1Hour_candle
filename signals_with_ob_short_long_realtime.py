@@ -78,8 +78,8 @@ def hourly_engulf_signals(
 
         current_candle_open = row['Open']
         current_candle_close = row['Close']
-        # current_candle_high = row['High']
-        # current_candle_low = row['Low']
+        current_candle_high = row['High']
+        current_candle_low = row['Low']
         # current_candle_time = row['Time']
         current_candle_body_size = abs(current_candle_open - current_candle_close)
 
@@ -113,31 +113,36 @@ def hourly_engulf_signals(
                             f"○ Last RED candle found at index {subsequent_index}, "
                             f"Time: {potential_ob_time}"
                         )
-                        # If the size of candle is within limits:
-                        if ob_candle_max_size >= potential_ob_body_size >= ob_candle_min_size:
-                            if potential_ob_doji >= 15:
+                        # If RED candle closed below initial GREEN candle:
+                        if potential_ob_candle_close < current_candle_low:
+                            print(
+                                f"○ RED candle has closed BELOW initial candle  {subsequent_index}, "
+                                f"Time: {potential_ob_time}"
+                            )
+                            # If the size of candle is within limits:
+                            if ob_candle_max_size >= potential_ob_body_size >= ob_candle_min_size:
+                                if potential_ob_doji >= 15:
 
-                                print('SEND SELL_LIMIT.1A')
-                                signal = f'-100+{subsequent_index}'
+                                    print('SEND SELL_LIMIT.1A')
+                                    signal = f'-100+{subsequent_index}'
 
-                                signals_counter += 1
+                                    signals_counter += 1
 
-                                s_signal, n_index, t_price, s_time = signal_triggered_output(
-                                    subsequent_index,
-                                    potential_ob_time,
-                                    potential_ob_candle_low,
-                                    side,
-                                    signal
-                                )
+                                    s_signal, n_index, t_price, s_time = signal_triggered_output(
+                                        subsequent_index,
+                                        potential_ob_time,
+                                        potential_ob_candle_low,
+                                        side,
+                                        signal
+                                    )
+                                else:
+                                    print(f"RED candle is doji (has body {potential_ob_doji})%")
                             else:
-                                print(f"RED candle is doji (has body {potential_ob_doji})%")
+                                print(f"RED candle size ({potential_ob_body_size}) is not within limits")
                         else:
-                            print(f"RED candle size ({potential_ob_body_size}) is not within limits")
+                            print(f"RED candle hasn't closed BELOW initial candle")
                     else:
                         print(f"Candle is not RED, checking next candle")
-
-            else:
-                print(f"Current candle size ({current_candle_body_size}) is not within limits")
 
         # If first condition is not true then is RED, and we are looking for longs:
         else:
@@ -165,30 +170,38 @@ def hourly_engulf_signals(
 
                 # If candle is GREEN
                 if potential_ob_candle_close > potential_ob_candle_open:
+
                     print(
                         f"○ Last GREEN candle found at index {subsequent_index}, "
                         f"Time: {potential_ob_time}"
                     )
-                    # If the size of candle is within limits:
-                    if ob_candle_max_size >= potential_ob_body_size >= ob_candle_min_size:
-                        if potential_ob_doji >= 15:
+                    # If GREEN candle closed ABOVE initial GREEN candle:
+                    if potential_ob_candle_close > current_candle_high:
+                        print(
+                            f"○ GREEN candle has closed ABOVE initial candle  {subsequent_index}, "
+                            f"Time: {potential_ob_time}"
+                        )
+                        # If the size of candle is within limits:
+                        if ob_candle_max_size >= potential_ob_body_size >= ob_candle_min_size:
+                            if potential_ob_doji >= 15:
 
-                            print('SEND BUY_LIMIT.2A')
-                            signal = f'100+{subsequent_index}'
-                            signals_counter += 1
+                                print('SEND BUY_LIMIT.2A')
+                                signal = f'100+{subsequent_index}'
+                                signals_counter += 1
 
-                            s_signal, n_index, t_price, s_time = signal_triggered_output(
-                                subsequent_index,
-                                potential_ob_time,
-                                potential_ob_candle_low,
-                                side,
-                                signal
-                            )
+                                s_signal, n_index, t_price, s_time = signal_triggered_output(
+                                    subsequent_index,
+                                    potential_ob_time,
+                                    potential_ob_candle_low,
+                                    side,
+                                    signal
+                                )
+                            else:
+                                print(f"GREEN candle is doji (has body {potential_ob_doji})%")
                         else:
-                            print(f"GREEN candle is doji (has body {potential_ob_doji})%")
+                            print(f"GREEN candle size ({potential_ob_body_size}) is not within limits")
                     else:
-                        print(f"GREEN candle size ({potential_ob_body_size}) is not within limits")
-
+                        print(f"GREEN candle hasn't closed ABOVE initial candle")
                 else:
                     print(f"Candle is not GREEN, checking next candle")
 
