@@ -19,7 +19,10 @@ risk_reward = 1                     # Risk/Reward ratio (Not used with multiple 
 stop_loss_offset = 1                # Is added to SL for Shorts and subtracted for Longs (can be equal to spread)
 
 # hardcoded_sr_levels = [('2024-11-02 16:19:00', 69245.00), ('2024-11-02 16:19:00', 69167.00)]  # Example support levels
-ob_candle_size = 30
+current_candle_max_size = 200
+current_candle_min_size = 20
+ob_candle_max_size = 200
+ob_candle_min_size = 200
 max_time_waiting_for_entry = 40     # Minutes
 
 level_lifetime_minutes = 60   # Minutes after interaction
@@ -90,8 +93,11 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
         signals_counter
     ) = hourly_engulf_signals(
         dataframe_from_log,
-        max_time_waiting_for_entry,
-        ob_candle_size
+        # max_time_waiting_for_entry,
+        current_candle_max_size,
+        current_candle_min_size,
+        ob_candle_max_size,
+        ob_candle_min_size
     )
 
     print(f'\nCandles processed since start: {candle_counter}')
