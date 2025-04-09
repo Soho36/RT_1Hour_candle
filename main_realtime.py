@@ -30,29 +30,24 @@ level_lifetime_minutes = 60   # Minutes after interaction
 clear_csv_before_start = True
 # **************************************************************************************************************
 
+"""
+Watchdog module monitors csv changes for adding new OHLC row and trigger main.py function calls 
+only when new data is added to the CSV
+"""
+
 # LIIKURI PATHS
-path_ohlc_check_for_change = 'C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\'
+path_ohlc_check_for_change = 'C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\'
 file = 'OHLCVData_1.csv'
 
-# SILLAMAE PATHS
-# path =
-# 'C:\\Users\\Vova deduskin lap\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Files'
-# file = 'OHLCVData_475.csv'
-# SILLAMAE PATHS
 
 buy_signal_flag = True                    # MUST BE TRUE BEFORE ENTERING MAIN LOOP
 sell_signal_flag = True                   # MUST BE TRUE BEFORE ENTERING MAIN LOOP
-last_signal = None                              # Initiate last signal
+last_signal = None                        # Initiate last signal
 
 # LEAVE ONLY FIRST OHLC IN CSV BEFORE CREATING DATAFRAME
 if clear_csv_before_start:
     leave_only_last_line()
     print('Csv first lines cleared before starting script'.upper())
-
-"""
-Watchdog module monitors csv changes for adding new OHLC row and trigger main.py function calls 
-only when new data is added to the CSV
-"""
 
 
 class CsvChangeHandler(FileSystemEventHandler):
@@ -74,9 +69,9 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
     print('\n********************************************************************************************************')
     print('\n********************************************************************************************************')
 
-    nt8_levels_path = 'nt8_levels.csv'
-    valid_levels_path = 'python_valid_levels.csv'
-    expired_levels_path = 'expired_levels.csv'
+    # nt8_levels_path = 'nt8_levels.csv'
+    # valid_levels_path = 'python_valid_levels.csv'
+    # expired_levels_path = 'expired_levels.csv'
 
     # GET DATAFRAME FROM LOG
     dataframe_from_log, last_datetime_of_df = get_dataframe_from_file(max_time_waiting_for_entry)
@@ -103,6 +98,8 @@ def run_main_functions(b_s_flag, s_s_flag, l_signal):
     print(f'\nCandles processed since start: {candle_counter}')
 
     last_order_timestamp = get_last_order_time_from_file()
+
+    last_candle_high, last_candle_low, last_candle_close, ticker = last_candle_ohlc(dataframe_from_log)
 
     # SEND ORDERS
     (

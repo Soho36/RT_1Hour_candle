@@ -17,6 +17,7 @@ def last_candle_ohlc(output_df_with_levels):
         last_candle_low = output_df_with_levels['Low'].iloc[-1]
         last_candle_close = output_df_with_levels['Close'].iloc[-1]
         ticker = output_df_with_levels['Ticker'].iloc[-1]
+
         return last_candle_high, last_candle_low, last_candle_close, ticker
     except IndexError:
         print("Must be at least two rows in the source file")
