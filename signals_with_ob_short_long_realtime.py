@@ -110,7 +110,7 @@ def hourly_engulf_signals(
                     # If candle is RED
                     if potential_ob_candle_close < potential_ob_candle_open:
                         print(
-                            f"○ Last RED candle found at index {subsequent_index}, "
+                            f"○ RED candle found at index {subsequent_index}, "
                             f"Time: {potential_ob_time}"
                         )
                         # If RED candle closed below initial GREEN candle:
@@ -142,9 +142,9 @@ def hourly_engulf_signals(
                         else:
                             print(f"RED candle hasn't closed BELOW initial candle")
                     else:
-                        print(f"Candle is not RED, checking next candle")
+                        print(f"Checking next candle")
 
-        # If first condition is not true then is RED, and we are looking for longs:
+        # If first condition is not true then candle is RED, and we are looking for longs:
         else:
             #  ********************************************************************************************
             #  LONGS LOGICS BEGIN HERE
@@ -172,7 +172,7 @@ def hourly_engulf_signals(
                 if potential_ob_candle_close > potential_ob_candle_open:
 
                     print(
-                        f"○ Last GREEN candle found at index {subsequent_index}, "
+                        f"○ GREEN candle found at index {subsequent_index}, "
                         f"Time: {potential_ob_time}"
                     )
                     # If GREEN candle closed ABOVE initial GREEN candle:
@@ -203,7 +203,7 @@ def hourly_engulf_signals(
                     else:
                         print(f"GREEN candle hasn't closed ABOVE initial candle")
                 else:
-                    print(f"Candle is not GREEN, checking next candle")
+                    print(f"Checking next candle")
 
     return (
             s_signal,   # signal 100 or -100
