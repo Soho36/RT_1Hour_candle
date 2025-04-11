@@ -78,11 +78,9 @@ def send_buy_sell_orders(
 
                         # Take Profit Prices (based on R:R ratios)
                         take_profit_price = round(entry_price + 1 * risk, 3)  # 1:1 R:R
-                        take_profit_price_2 = round(entry_price + 2 * risk, 3)  # 2:1 R:R
-                        take_profit_price_3 = round(entry_price + 5 * risk, 3)  # 5:1 R:R
 
                         line_order_parameters_nt8 = \
-                            f'Buy, {stop_market_price}, {stop_loss_price}, {take_profit_price}, {take_profit_price_2}, {take_profit_price_3}'
+                            f'Buy, {stop_market_price}, {stop_loss_price}, {take_profit_price}'
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
@@ -131,11 +129,9 @@ def send_buy_sell_orders(
 
                         # Take Profit Prices (based on R:R ratios)
                         take_profit_price = round(entry_price - 1 * risk, 3)
-                        take_profit_price_2 = round(entry_price - 2 * risk, 3)
-                        take_profit_price_3 = round(entry_price - 5 * risk, 3)
 
                         line_order_parameters_nt8 = \
-                            f'Sell, {stop_market_price}, {stop_loss_price}, {take_profit_price}, {take_profit_price_2}, {take_profit_price_3}'
+                            f'Sell, {stop_market_price}, {stop_loss_price}, {take_profit_price}'
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
