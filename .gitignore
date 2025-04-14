@@ -1,3 +1,8 @@
 venv/
 __pycache__/
 .idea/
+build/
+dist/
+Distrib/
+main_realtime.exe
+main_realtime.spec

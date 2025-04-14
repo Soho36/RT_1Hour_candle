@@ -26,7 +26,19 @@ using NinjaTrader.NinjaScript.DrawingTools;
 namespace NinjaTrader.NinjaScript.Strategies
 {
     public class MyCustomStrategyShortOnly : Strategy
-    {
+    {	
+		[NinjaScriptProperty]
+		[Display(Name = "Signal File Path", Order = 1, GroupName = "File Paths")]
+		public string SignalFilePath { get; set; }
+        
+		[NinjaScriptProperty]
+		[Display(Name = "Position State File Path", Order = 2, GroupName = "File Paths")]
+		public string PositionStateFilePath { get; set; }
+
+		[NinjaScriptProperty]
+		[Display(Name = "Active Orders File Path", Order = 3, GroupName = "File Paths")]
+		public string ActiveOrdersFilePath { get; set; }
+		
         private bool executeShortTrade = false;
         
 		private double entryPriceShortOnly = 0;
@@ -45,8 +57,8 @@ namespace NinjaTrader.NinjaScript.Strategies
 		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";		
 		// private string activeOrdersFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\current_order_direction.txt";
 		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state_longs.txt";
-		private string activeOrdersFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\current_order_direction.txt";
-		private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_shorts.txt";
+		// private string activeOrdersFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\current_order_direction.txt";
+		// private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_shorts.txt";
 		
 		// Declare a Dictionary to Track Order Ages
 		private Dictionary<string, int> orderCreationCandle = new Dictionary<string, int>();
@@ -54,7 +66,11 @@ namespace NinjaTrader.NinjaScript.Strategies
         protected override void OnStateChange()
         {
             if (State == State.SetDefaults)
-            {
+            {	
+				SignalFilePath = @"C:\Path\To\Your\signal_file.txt";
+				PositionStateFilePath = @"C:\Path\To\Your\position_state.txt";
+				ActiveOrdersFilePath = @"C:\Path\To\Your\active_orders.txt";
+				
                 Name = "Filetransmit_ShortOnly";
                 Calculate = Calculate.OnEachTick;
                 EntriesPerDirection = 1; // Allow entries
@@ -72,12 +88,12 @@ namespace NinjaTrader.NinjaScript.Strategies
 			// PATHS FOR DEDUSKIN LAP AND LIIKURI
 			
 			// string signalFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\trade_signal.txt";
-			string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";
-			if (File.Exists(signalFilePath))
+			// string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";
+			if (File.Exists(SignalFilePath))
 			{
 				try
 				{
-					string signal = File.ReadAllText(signalFilePath).Trim();
+					string signal = File.ReadAllText(SignalFilePath).Trim();
 					if (string.IsNullOrEmpty(signal))
 					{
 						if (!hasPrintedEmptySignalMessage)
@@ -95,7 +111,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 					{
 						CancelAllOrders();
 						Print("Received Cancel signal. All active orders have been cancelled.");
-						File.WriteAllText(signalFilePath, string.Empty); // Clear the signal file
+						File.WriteAllText(SignalFilePath, string.Empty); // Clear the signal file
 						return; // Exit early as no further action is needed
 					}
 					if (parts.Length == 6)
@@ -113,7 +129,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 								if (Position.MarketPosition == MarketPosition.Flat)
 								{
 									executeShortTrade = true;
-									File.WriteAllText(signalFilePath, string.Empty);
+									File.WriteAllText(SignalFilePath, string.Empty);
 								}
 							}
 						}
@@ -182,7 +198,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 			{
 				try
 				{
-					File.WriteAllText(positionStateFilePath, currentPositionState);
+					File.WriteAllText(PositionStateFilePath, currentPositionState);
 					Print($"Position state updated: {currentPositionState}");
 					lastPositionState = currentPositionState; // Update the tracked state
 				}
@@ -203,16 +219,16 @@ namespace NinjaTrader.NinjaScript.Strategies
 				// Check if there are active buy or sell orders
 				if (activeOrders.Any(o => o.OrderAction == OrderAction.Buy))
 				{
-					File.WriteAllText(activeOrdersFilePath, "buy");
+					File.WriteAllText(ActiveOrdersFilePath, "buy");
 				}
 				else if (activeOrders.Any(o => o.OrderAction == OrderAction.SellShort))
 				{
-					File.WriteAllText(activeOrdersFilePath, "sell");
+					File.WriteAllText(ActiveOrdersFilePath, "sell");
 				}
 				else
 				{
 					// No active orders
-					File.WriteAllText(activeOrdersFilePath, "");
+					File.WriteAllText(ActiveOrdersFilePath, "");
 				}
 			}
 			catch (Exception ex)
