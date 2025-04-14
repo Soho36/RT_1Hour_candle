@@ -11,8 +11,8 @@ def hourly_engulf_signals(
         # max_time_waiting_for_entry,
         current_candle_max_size,
         current_candle_min_size,
-        ob_candle_max_size,
-        ob_candle_min_size
+        # ob_candle_max_size,
+        # ob_candle_min_size
 ):
     # signals_threshold = 10
     n_index = None
