@@ -28,25 +28,24 @@ namespace NinjaTrader.NinjaScript.Strategies
     public class MyCustomStrategyLongOnly : Strategy
     {
         private bool executeLongTrade = false;
-        
+
 		private double entryPriceLongOnly = 0;
 		private double stopPrice = 0;
-		
+
         private double targetPrice1 = 0;
-		
+
 		private Order longOrder1;
-		
+
 		private string lastPositionState = "closed"; // Tracks the last written position state
 		private bool hasPrintedEmptySignalMessage = false; // Flag to track if the empty signal message has been printed
 		private bool hasPrintedExceptionMessage = false; // Flag to track if the empty signal message has been printed
 		// PATHS FOR DEDUSKIN LAP AND LIIKURI
-		
-		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";		
+
+		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";
 		// private string activeOrdersFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\current_order_direction.txt";
 		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state_longs.txt";
 		private string activeOrdersFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\current_order_direction.txt";
 		private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_longs.txt";
-		
 		// Declare a Dictionary to Track Order Ages
 		private Dictionary<string, int> orderCreationCandle = new Dictionary<string, int>();
 
@@ -67,11 +66,11 @@ namespace NinjaTrader.NinjaScript.Strategies
 			CancelOldOrders(CurrentBar, 5);
 			if (CurrentBars[0] < BarsRequiredToTrade)
 				return;
-			
+
 			// PATHS FOR DEDUSKIN LAP AND LIIKURI
-			
+
 			// string signalFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\trade_signal.txt";
-			string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";		
+			string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";
 			if (File.Exists(signalFilePath))
 			{
 				try
@@ -86,9 +85,9 @@ namespace NinjaTrader.NinjaScript.Strategies
 						}
 						return; // Exit early if the file is empty
 					}
-					hasPrintedEmptySignalMessage = false; // Reset the flag if the file is not empty		
+					hasPrintedEmptySignalMessage = false; // Reset the flag if the file is not empty
 					string[] parts = signal.Split(',');
-					
+
 					// Handle Cancel signal
 					if (signal.Equals("Cancel", StringComparison.OrdinalIgnoreCase))
 					{
@@ -105,7 +104,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 							double.TryParse(parts[1].Trim(), out entryPriceLongOnly) &&     // entryPriceLongOnly
 							double.TryParse(parts[2].Trim(), out stopPrice) &&      // Stop-loss price
 							double.TryParse(parts[3].Trim(), out targetPrice1)   // Take-profit1 price
-							)             
+							)
 						{
 							if (tradeDirection.Equals("Buy", StringComparison.OrdinalIgnoreCase))
 							{
@@ -128,7 +127,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 						return; // Exit early if the file is empty
 				}
 				hasPrintedExceptionMessage = false; // Reset the flag if the file is not empty
-				
+
 			}
 
 			// Handle long positions
@@ -159,7 +158,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 				executeLongTrade = false; // Reset flag
 			}
 		}
-    
+
 
 		protected override void OnExecutionUpdate(Cbi.Execution execution, string executionId, double price, int quantity, MarketPosition marketPosition, string orderId, DateTime time)
 		{
@@ -241,7 +240,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 				Print($"Error canceling orders: {ex.Message}");
 			}
 		}
-		
+
 		private void CancelOldOrders(int currentCandleIndex, int maxCandleAge)
 		{
 			try
@@ -257,7 +256,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 
 					// Check only orders in working or accepted state
 					if (order.OrderState == OrderState.Working || order.OrderState == OrderState.Accepted)
-					{	
+					{
 						// Check if the order is being tracked in the dictionary
 						if (orderCreationCandle.TryGetValue(order.OrderId, out int orderCandleIndex))
 						{
