@@ -144,8 +144,8 @@ namespace NinjaTrader.NinjaScript.Strategies
 							return; // Exit without placing the order
 						}
 
-						longOrder1 = EnterLongStopMarket(0, true, 2, entryPriceLongOnly, "Long1");
-						orderCreationCandle[longOrder1.OrderId] = CurrentBar; // Track candle index for the order
+						longOrder1 = EnterLongStopMarket(0, true, 1, entryPriceLongOnly, "Long1"); // Third parameter is an order size
+                        orderCreationCandle[longOrder1.OrderId] = CurrentBar; // Track candle index for the order
 						SetStopLoss("Long1", CalculationMode.Price, stopPrice, false);
 						SetProfitTarget("Long1", CalculationMode.Price, targetPrice1);
 						Print($"1-st LONG stop-market order placed at {entryPriceLongOnly} with TP1: {targetPrice1}, SL: {stopPrice}");

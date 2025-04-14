@@ -35,7 +35,8 @@ def send_buy_sell_orders(
         last_candle_low,
         stop_loss_offset,
         current_order_timestamp,
-        last_order_timestamp
+        last_order_timestamp,
+        risk_reward
 ):
 
     current_time = pd.to_datetime(datetime.now())
@@ -77,7 +78,7 @@ def send_buy_sell_orders(
                         risk = entry_price - stop_loss_price  # Distance between entry and stop loss
 
                         # Take Profit Prices (based on R:R ratios)
-                        take_profit_price = round(entry_price + 1 * risk, 3)  # 1:1 R:R
+                        take_profit_price = round(entry_price + 1 * risk * risk_reward, 3)  # 1:1 R:R
 
                         line_order_parameters_nt8 = \
                             f'Buy, {stop_market_price}, {stop_loss_price}, {take_profit_price}'
@@ -128,7 +129,7 @@ def send_buy_sell_orders(
                         risk = stop_loss_price - entry_price
 
                         # Take Profit Prices (based on R:R ratios)
-                        take_profit_price = round(entry_price - 1 * risk, 3)
+                        take_profit_price = round(entry_price - 1 * risk * risk_reward, 3)
 
                         line_order_parameters_nt8 = \
                             f'Sell, {stop_market_price}, {stop_loss_price}, {take_profit_price}'

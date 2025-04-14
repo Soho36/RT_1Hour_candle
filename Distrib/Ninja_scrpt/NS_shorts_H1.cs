@@ -146,7 +146,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 							return; // Exit without placing the order
 						}
 							
-						shortOrder1 = EnterShortStopMarket(0, true, 2, entryPriceShortOnly, "Short1");
+						shortOrder1 = EnterShortStopMarket(0, true, 1, entryPriceShortOnly, "Short1"); // Third parameter is an order size
 						orderCreationCandle[shortOrder1.OrderId] = CurrentBar; // Track candle index for the order
 						SetStopLoss("Short1", CalculationMode.Price, stopPrice, false);
 						SetProfitTarget("Short1", CalculationMode.Price, targetPrice1);
