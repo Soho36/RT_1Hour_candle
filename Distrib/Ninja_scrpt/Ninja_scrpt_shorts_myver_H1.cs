@@ -25,27 +25,28 @@ using NinjaTrader.NinjaScript.DrawingTools;
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-    public class MyCustomStrategyLongOnly : Strategy
+    public class MyCustomStrategyShortOnly : Strategy
     {
-        private bool executeLongTrade = false;
+        private bool executeShortTrade = false;
         
-		private double entryPriceLongOnly = 0;
+		private double entryPriceShortOnly = 0;
 		private double stopPrice = 0;
 		
         private double targetPrice1 = 0;
-		
-		private Order longOrder1;
+
+		private Order shortOrder1;
 		
 		private string lastPositionState = "closed"; // Tracks the last written position state
 		private bool hasPrintedEmptySignalMessage = false; // Flag to track if the empty signal message has been printed
 		private bool hasPrintedExceptionMessage = false; // Flag to track if the empty signal message has been printed
 		// PATHS FOR DEDUSKIN LAP AND LIIKURI
 		
+		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";
 		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";		
 		// private string activeOrdersFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\current_order_direction.txt";
 		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state_longs.txt";
 		private string activeOrdersFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\current_order_direction.txt";
-		private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_longs.txt";
+		private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_shorts.txt";
 		
 		// Declare a Dictionary to Track Order Ages
 		private Dictionary<string, int> orderCreationCandle = new Dictionary<string, int>();
@@ -54,7 +55,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             if (State == State.SetDefaults)
             {
-                Name = "Filetransmit_LongOnly";
+                Name = "Filetransmit_ShortOnly";
                 Calculate = Calculate.OnEachTick;
                 EntriesPerDirection = 1; // Allow entries
                 EntryHandling = EntryHandling.UniqueEntries;
@@ -67,11 +68,11 @@ namespace NinjaTrader.NinjaScript.Strategies
 			CancelOldOrders(CurrentBar, 5);
 			if (CurrentBars[0] < BarsRequiredToTrade)
 				return;
-			
+
 			// PATHS FOR DEDUSKIN LAP AND LIIKURI
 			
 			// string signalFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\trade_signal.txt";
-			string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";		
+			string signalFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\trade_signal.txt";
 			if (File.Exists(signalFilePath))
 			{
 				try
@@ -102,16 +103,16 @@ namespace NinjaTrader.NinjaScript.Strategies
 					{
 						string tradeDirection = parts[0].Trim();                    // Direction
 						if (
-							double.TryParse(parts[1].Trim(), out entryPriceLongOnly) &&     // entryPriceLongOnly
+							double.TryParse(parts[1].Trim(), out entryPriceShortOnly) &&     // entryPriceShortOnly
 							double.TryParse(parts[2].Trim(), out stopPrice) &&      // Stop-loss price
 							double.TryParse(parts[3].Trim(), out targetPrice1)   // Take-profit1 price
 							)             
 						{
-							if (tradeDirection.Equals("Buy", StringComparison.OrdinalIgnoreCase))
+							if (tradeDirection.Equals("Sell", StringComparison.OrdinalIgnoreCase))
 							{
 								if (Position.MarketPosition == MarketPosition.Flat)
 								{
-									executeLongTrade = true;
+									executeShortTrade = true;
 									File.WriteAllText(signalFilePath, string.Empty);
 								}
 							}
@@ -128,39 +129,38 @@ namespace NinjaTrader.NinjaScript.Strategies
 						return; // Exit early if the file is empty
 				}
 				hasPrintedExceptionMessage = false; // Reset the flag if the file is not empty
-				
 			}
 
-			// Handle long positions
-			if (executeLongTrade)
+			// Handle short positions
+			if (executeShortTrade)
 			{
 				try
 				{
-					if (longOrder1 == null || longOrder1.OrderState != OrderState.Working)
+					if (shortOrder1 == null || shortOrder1.OrderState != OrderState.Working)
 					{
-						if (entryPriceLongOnly <= GetCurrentAsk())
+						if (entryPriceShortOnly >= GetCurrentBid())
+							
 						{
-							Print("Error: Buy stop order price must be above the current market price.");
-							executeLongTrade = false; // Reset flag
+							Print("Error: Sell stop order price must be below the current market price.");
+							executeShortTrade = false; // Reset flag
 							return; // Exit without placing the order
 						}
-
-						longOrder1 = EnterLongStopMarket(0, true, 2, entryPriceLongOnly, "Long1");
-						orderCreationCandle[longOrder1.OrderId] = CurrentBar; // Track candle index for the order
-						SetStopLoss("Long1", CalculationMode.Price, stopPrice, false);
-						SetProfitTarget("Long1", CalculationMode.Price, targetPrice1);
-						Print($"1-st LONG stop-market order placed at {entryPriceLongOnly} with TP1: {targetPrice1}, SL: {stopPrice}");
-					}
+							
+						shortOrder1 = EnterShortStopMarket(0, true, 2, entryPriceShortOnly, "Short1");
+						orderCreationCandle[shortOrder1.OrderId] = CurrentBar; // Track candle index for the order
+						SetStopLoss("Short1", CalculationMode.Price, stopPrice, false);
+						SetProfitTarget("Short1", CalculationMode.Price, targetPrice1);
+						Print($"1-st SHORT order placed at {entryPriceShortOnly} with TP1: {targetPrice1}, SL: {stopPrice}");
+					}		
 				}
 				catch (Exception ex)
 				{
-					Print($"Error placing long orders: {ex.Message}");
+					Print($"Error placing short orders: {ex.Message}");
 				}
-				executeLongTrade = false; // Reset flag
+				executeShortTrade = false;  // Reset flag
 			}
 		}
-    
-
+		
 		protected override void OnExecutionUpdate(Cbi.Execution execution, string executionId, double price, int quantity, MarketPosition marketPosition, string orderId, DateTime time)
 		{
 			base.OnExecutionUpdate(execution, executionId, price, quantity, marketPosition, orderId, time);
@@ -170,10 +170,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 
 			if (Position.MarketPosition == MarketPosition.Flat)
 				currentPositionState = "closed";
-			else if (Position.MarketPosition == MarketPosition.Long)
-				currentPositionState = "opened_long";
-			/* else if (Position.MarketPosition == MarketPosition.Short)
-				currentPositionState = "opened_short"; */
+			/* else if (Position.MarketPosition == MarketPosition.Long)
+				currentPositionState = "opened_long"; */
+			else if (Position.MarketPosition == MarketPosition.Short)
+				currentPositionState = "opened_short";
 			else
 				return; // Safety check, no action for unknown market position
 
@@ -192,7 +192,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 				}
 			}
 		}
-
+    
 		protected override void OnOrderUpdate(Order order, double limitPrice, double stopPrice, int quantity, int filled, double averageFillPrice, OrderState orderState, DateTime time, ErrorCode error, string comment)
 		{
 			try
@@ -289,5 +289,6 @@ namespace NinjaTrader.NinjaScript.Strategies
 				Print($"Error in CancelOldOrders: {ex.Message}");
 			}
 		}
+
     }
 }
