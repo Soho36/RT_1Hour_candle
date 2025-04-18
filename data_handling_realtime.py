@@ -39,6 +39,16 @@ def leave_only_last_line():     # Clear file before starting the script
             print('Reading OHLC. File is empty...')
 
 
+def set_position_state_to_closed_before_start(state):  # Called from orders_sender.py
+    with open(position_state_shorts_path, 'w', encoding='utf-8') as file:
+        file.write(state)
+        print(f"Position state shorts is set to {state} before starting script")
+
+    with open(position_state_longs_path, 'w', encoding='utf-8') as file:
+        file.write(state)
+        print(f"Position state longs is set to {state} before starting script")
+
+
 def get_dataframe_from_file(max_time_waiting_for_entry):
 
     log_df = pd.read_csv(

@@ -3,7 +3,8 @@ import os
 import pandas as pd
 from data_handling_realtime import (get_dataframe_from_file,
                                     leave_only_last_line,
-                                    get_last_order_time_from_file)
+                                    get_last_order_time_from_file,
+                                    set_position_state_to_closed_before_start)
 from signals_with_ob_short_long_realtime import hourly_engulf_signals
 from orders_sender import last_candle_ohlc, send_buy_sell_orders
 from watchdog.observers import Observer
@@ -36,7 +37,7 @@ only when new data is added to the CSV
 """
 
 # LIIKURI PATHS
-path_ohlc_check_for_change = 'C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\'
+base_path = os.getcwd()
 file = 'OHLCVData_1.csv'
 
 
@@ -49,6 +50,8 @@ if clear_csv_before_start:
     leave_only_last_line()
     print('Csv first lines cleared before starting script'.upper())
 
+set_position_state_to_closed_before_start('closed')  # Set position state to closed before starting script
+
 
 class CsvChangeHandler(FileSystemEventHandler):
     print("\nScript successfully started. Waiting for first candle to close...".upper())
@@ -56,7 +59,7 @@ class CsvChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
         global buy_signal_flag, sell_signal_flag, last_signal
         # print(f"File modified: {event.src_path}")  # This should print on any modification
-        if not event.src_path == os.path.join(path_ohlc_check_for_change, file):  # CSV file path
+        if not event.src_path == os.path.join(base_path, file):  # CSV file path
             return
         print("CSV file updated; triggering function calls...")
         # Call a function that contains all main calls
@@ -128,10 +131,10 @@ if __name__ == "__main__":
     try:
         event_handler = CsvChangeHandler()
         observer = Observer()
-        observer.schedule(event_handler, path_ohlc_check_for_change, recursive=False)  # CSV folder path
+        observer.schedule(event_handler, base_path, recursive=False)  # CSV folder path
         observer.start()
     except FileNotFoundError as e:
-        print(f'Error: {e}. \nPlease check that the path: {path_ohlc_check_for_change} exists and is accessible.')
+        print(f'Error: {e}. \nPlease check that the path: {base_path} exists and is accessible.')
 
     else:
         # Run the observer only if no exceptions were raised
