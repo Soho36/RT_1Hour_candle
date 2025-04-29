@@ -1,5 +1,5 @@
-import pandas as pd
-# from data_handling_realtime import get_position_state
+from data_handling_realtime import active_position, write_sl_tp
+
 
 """
 Main function analyzing price interaction with levels and long/short signals generation logics
@@ -62,6 +62,8 @@ def hourly_engulf_signals(
         current_candle_low = row['Low']
         current_candle_time = row['Time']
         current_candle_range = abs(current_candle_high - current_candle_low)
+        initial_tp_longs = current_candle_high + current_candle_range
+        initial_tp_shorts = current_candle_low - current_candle_range
 
         # Check if current candle is GREEN:
         if current_candle_close > current_candle_open:
@@ -87,7 +89,11 @@ def hourly_engulf_signals(
 
             else:
                 print("GREEN candle size is not OK")
-        if
+        # if active_position():
+        #     print("Active position is open (shorts)")
+        #     write_sl_tp(current_candle_low, initial_tp_shorts)
+        #     print("SL and TP orders are written to file (shorts)")
+
         # IF FIRST CONDITION IS NOT TRUE THEN CANDLE IS RED, AND WE ARE LOOKING FOR LONGS:
         else:
             if current_candle_max_size >= current_candle_range >= current_candle_min_size:
@@ -111,6 +117,11 @@ def hourly_engulf_signals(
 
             else:
                 print("RED candle size is not OK")
+
+        if active_position():
+            print("Active position is open (longs)")
+            write_sl_tp(initial_tp_longs)
+            print("SL and TP orders are written to file (longs)")
 
     return (
             s_signal,   # signal 100 or -100

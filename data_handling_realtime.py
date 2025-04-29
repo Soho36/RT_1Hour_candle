@@ -28,6 +28,8 @@ current_order_direction_path = 'current_order_direction.txt'
 
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 active_position_file_path = f'active_position.csv'
+tp_orders_file_path = 'tp_orders.csv'
+
 
 def leave_only_last_line():     # Clear file before starting the script
     with open(nt8_logging_file_path, 'r', encoding='utf-8') as file:
@@ -48,6 +50,14 @@ def set_position_state_to_closed_before_start(state):  # Called from orders_send
     with open(position_state_longs_path, 'w', encoding='utf-8') as file:
         file.write(state)
         print(f"Position state longs is set to {state} before starting script")
+
+    with open(active_position_file_path, 'w', encoding='utf-8') as file:
+        file.write('')
+        print(f"Clear active_position.csv before starting script")
+
+    with open(tp_orders_file_path, 'w', encoding='utf-8') as file:
+        file.write('')
+        print(f"Clear tp_orders.csv before starting script")
 
 
 def get_dataframe_from_file(max_time_waiting_for_entry):
@@ -118,10 +128,17 @@ def get_last_order_time_from_file():
         return last_order_timestamp
 
 
-def read_entry_price():  # Read entry price from the active position file
+def active_position():  # Read entry price from the active position file
     with open(active_position_file_path, 'r') as file:
         reader = csv.reader(file)
         rows = list(reader)
         if rows:
             return float(rows[-1][0])  # last entry
     return None
+
+
+def write_sl_tp(tp):    # Write stop loss and take profit to file
+    with open(tp_orders_file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([tp])
+    print(f"[INFO] TP: {tp} written to {tp_orders_file_path}")
