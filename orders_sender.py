@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from data_handling_realtime import (
     save_order_parameters_to_file,
+    sl_and_tp_save_order_parameters_to_file,
     # get_current_pending_order_direction,
     save_list_of_orders_to_file,
     get_position_state_longs,
@@ -82,9 +83,13 @@ def send_buy_sell_orders(
 
                         line_order_parameters_nt8 = \
                             f'Buy, {stop_market_price}, {stop_loss_price}, {take_profit_price}'
+                        line_sl_tp_order_parameters_nt8 = \
+                            f'B, {stop_loss_price}, {take_profit_price}'
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
+                        print('Saving new SL and TP to file: ', line_order_parameters_nt8)
+                        sl_and_tp_save_order_parameters_to_file(line_sl_tp_order_parameters_nt8)
                         # line_order_parameters_to_order_list = f'{n_index},Buy,{t_price},{s_time}'
                         line_order_parameters_to_order_list = f'{current_order_timestamp}'
                         print('line_order_parameters_to_order_list: ', line_order_parameters_to_order_list)
@@ -133,10 +138,13 @@ def send_buy_sell_orders(
 
                         line_order_parameters_nt8 = \
                             f'Sell, {stop_market_price}, {stop_loss_price}, {take_profit_price}'
+                        line_sl_tp_order_parameters_nt8 = \
+                            f'S, {stop_loss_price}, {take_profit_price}'
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
-
+                        print('Saving new SL and TP to file: ', line_order_parameters_nt8)
+                        sl_and_tp_save_order_parameters_to_file(line_sl_tp_order_parameters_nt8)
                         # line_order_parameters_to_order_list = f'{n_index},Sell,{t_price},{s_time}'
                         line_order_parameters_to_order_list = f'{current_order_timestamp}'
                         print('line_order_parameters_to_order_list: ', line_order_parameters_to_order_list)
