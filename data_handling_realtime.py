@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import time
+import csv
 
 # log_file_reading_interval = 1       # File reading interval (sec)
 
@@ -26,7 +27,7 @@ position_state_shorts_path = 'position_state_shorts.txt'
 current_order_direction_path = 'current_order_direction.txt'
 
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
+active_position_file_path = f'active_position.csv'
 
 def leave_only_last_line():     # Clear file before starting the script
     with open(nt8_logging_file_path, 'r', encoding='utf-8') as file:
@@ -115,3 +116,12 @@ def get_last_order_time_from_file():
             last_order_timestamp = pd.to_datetime('2024-01-01 00:00:00')  # Default value while the file is empty
 
         return last_order_timestamp
+
+
+def read_entry_price():  # Read entry price from the active position file
+    with open(active_position_file_path, 'r') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+        if rows:
+            return float(rows[-1][0])  # last entry
+    return None
