@@ -71,8 +71,8 @@ def start_entry_watcher():  # Function to watch for changes in active_position.c
 
     def read_entry_price():
         try:
-            with open('active_position.csv', 'r') as file:
-                rows = list(csv.reader(file))
+            with open('active_position.csv', 'r') as f:
+                rows = list(csv.reader(f))
                 if rows:
                     return float(rows[-1][0])
         except Exception as e:
@@ -96,15 +96,17 @@ def start_entry_watcher():  # Function to watch for changes in active_position.c
         return None
 
     def calc_sl_tp(entry, candle):
-        risk = 20  # You can make this dynamic later
-        sl = entry - risk
-        tp = entry + risk
+        if not candle:
+            print("[ERROR] No candle data for SL/TP calculation.")
+            return None, None
+        sl = candle['low']
+        tp = candle['high']
         return round(sl, 2), round(tp, 2)
 
     def write_sl_tp(sl, tp):
         try:
-            with open('SL_TP_orders.csv', 'w', newline='') as file:
-                writer = csv.writer(file)
+            with open('SL_TP_orders.csv', 'w', newline='') as f:
+                writer = csv.writer(f)
                 writer.writerow([sl, tp])
             print(f"[ENTRY LOGIC] SL: {sl}, TP: {tp} written to SL_TP_orders.csv")
         except Exception as e:
