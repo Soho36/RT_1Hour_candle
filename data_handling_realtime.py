@@ -24,7 +24,7 @@ list_of_orders_path = 'list_of_orders.csv'
 
 position_state_longs_path = 'position_state_longs.txt'
 position_state_shorts_path = 'position_state_shorts.txt'
-active_position_path = 'active_position.txt'
+active_position_path = 'active_position.csv'
 
 current_order_direction_path = 'current_order_direction.txt'
 
