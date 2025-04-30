@@ -21,13 +21,13 @@ nt8_buy_sell_signals_for_path = f'trade_signal.txt'
 
 list_of_orders_path = 'list_of_orders.csv'
 
-position_state_longs_path = 'position_state_longs.txt'
+position_state_longs_path = 'position_state_longs.csv'
 position_state_shorts_path = 'position_state_shorts.txt'
 
 current_order_direction_path = 'current_order_direction.txt'
 
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-active_position_file_path = f'active_position.csv'
+active_position_file_path = f'position_state_longs.csv'
 tp_orders_file_path = 'tp_orders.csv'
 
 
@@ -133,7 +133,7 @@ def active_position():  # Read entry price from the active position file
         reader = csv.reader(file)
         rows = list(reader)
         if rows:
-            return float(rows[-1][0])  # last entry
+            return rows[-1][0]  # last entry
     return None
 
 
