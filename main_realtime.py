@@ -9,7 +9,9 @@ from signals_with_ob_short_long_realtime import hourly_engulf_signals
 from orders_sender import last_candle_ohlc, send_buy_sell_orders
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from colorama import Fore, Style, init
 
+init(autoreset=True)
 # pd.set_option('display.max_rows', 100)  # Increase the number of rows shown
 pd.set_option('display.max_columns', 9)  # Increase the number of columns shown
 pd.set_option('display.width', 700)  # Increase the terminal width for better visibility
@@ -54,7 +56,8 @@ set_position_state_to_closed_before_start('closed')  # Set position state to clo
 
 
 class CsvChangeHandler(FileSystemEventHandler):
-    print("\nScript successfully started. Waiting for first candle to close...".upper())
+    # print("\nScript successfully started. Waiting for first candle to close...".upper())
+    print(Fore.YELLOW + Style.BRIGHT + "\nScript successfully started. Waiting for first candle to close...".upper())
 
     def on_modified(self, event):
         global buy_signal_flag, sell_signal_flag, last_signal
@@ -71,10 +74,6 @@ class CsvChangeHandler(FileSystemEventHandler):
 def run_main_functions(b_s_flag, s_s_flag, l_signal):
     print('\n********************************************************************************************************')
     print('\n********************************************************************************************************')
-
-    # nt8_levels_path = 'nt8_levels.csv'
-    # valid_levels_path = 'python_valid_levels.csv'
-    # expired_levels_path = 'expired_levels.csv'
 
     # GET DATAFRAME FROM LOG
     dataframe_from_log, last_datetime_of_df = get_dataframe_from_file(max_time_waiting_for_entry)

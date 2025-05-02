@@ -8,7 +8,10 @@ from data_handling_realtime import (
     get_position_state_longs,
     get_position_state_shorts
 )
-# import time
+from colorama import Fore, Style, init
+
+
+init(autoreset=True)
 
 
 def last_candle_ohlc(output_df_with_levels):
@@ -68,7 +71,8 @@ def send_buy_sell_orders(
 
                         winsound.PlaySound('chord.wav', winsound.SND_FILENAME)
                         print()
-                        print(f'{n_index} ▲ ▲ ▲ Buy order has been sent to NT8! ▲ ▲ ▲ {current_time}'.upper())
+                        # print(f'{n_index} ▲ ▲ ▲ Buy order has been sent to NT8! ▲ ▲ ▲ {current_time}'.upper())
+                        print(Fore.GREEN + Style.BRIGHT + f'{n_index} ▲ ▲ ▲ Buy order has been sent to NT8! ▲ ▲ ▲ {current_time}'.upper())
 
                         # ORDER PARAMETERS
                         entry_price = last_candle_high
@@ -119,7 +123,8 @@ def send_buy_sell_orders(
                         # Play sound to indicate order sent
                         winsound.PlaySound('chord.wav', winsound.SND_FILENAME)
                         print()
-                        print(f'{n_index} ▼ ▼ ▼ Sell order has been sent to NT8! ▼ ▼ ▼ {current_time}'.upper())
+                        # print(f'{n_index} ▼ ▼ ▼ Sell order has been sent to NT8! ▼ ▼ ▼ {current_time}'.upper())
+                        print(Fore.RED + Style.BRIGHT + f'{n_index} ▼ ▼ ▼ Sell order has been sent to NT8! ▼ ▼ ▼ {current_time}'.upper())
 
                         # ORDER PARAMETERS
                         entry_price = last_candle_low

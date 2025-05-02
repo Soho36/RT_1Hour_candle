@@ -55,13 +55,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 		private string lastPositionState = "closed"; // Tracks the last written position state
 		private bool hasPrintedEmptySignalMessage = false; // Flag to track if the empty signal message has been printed
 		private bool hasPrintedExceptionMessage = false; // Flag to track if the empty signal message has been printed
-		// PATHS FOR DEDUSKIN LAP AND LIIKURI
-
-		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state.txt";
-		// private string currentOrderDirectionFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\current_order_direction.txt";
-		// private string positionStateFilePath = "C:\\Users\\Liikurserv\\PycharmProjects\\RT_Ninja\\position_state_longs.txt";
-		// private string activeOrdersFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\current_order_direction.txt";
-		// private string positionStateFilePath = "C:\\Users\\Vova deduskin lap\\PycharmProjects\\RT_1Hour_candle\\position_state_longs.txt";
+		
 		// Declare a Dictionary to Track Order Ages
 		private Dictionary<string, int> orderCreationCandle = new Dictionary<string, int>();
 

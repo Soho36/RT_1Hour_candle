@@ -27,7 +27,7 @@ position_state_shorts_path = 'position_state_shorts.txt'
 current_order_direction_path = 'current_order_direction.txt'
 
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-active_position_file_path = f'position_state_longs.csv'
+active_position_file_path = f'active_position.csv'
 tp_orders_file_path = 'tp_orders.csv'
 
 

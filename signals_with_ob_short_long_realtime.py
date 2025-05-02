@@ -1,6 +1,8 @@
 from data_handling_realtime import active_position, write_sl_tp
+from colorama import Fore, Style, init
 
 
+init(autoreset=True)
 """
 Main function analyzing price interaction with levels and long/short signals generation logics
 """
@@ -73,7 +75,9 @@ def hourly_engulf_signals(
                     f"Time: {current_candle_time}\n"
                     f"Min: {current_candle_min_size}, Body: {current_candle_range}, Max: {current_candle_max_size}"
                 )
-                print('SEND SELL_STOP')
+
+                # print('SEND SELL_STOP')
+                print(Fore.RED + Style.BRIGHT + 'SEND SELL_STOP')
                 signal = f'-100+{index}'
 
                 signals_counter += 1
@@ -88,7 +92,9 @@ def hourly_engulf_signals(
                 )
 
             else:
-                print("GREEN candle size is not OK")
+                # print("GREEN candle size is not OK")
+                print(Fore.YELLOW + Style.BRIGHT + "GREEN candle size is not OK")
+
         # if active_position():
         #     print("Active position is open (shorts)")
         #     write_sl_tp(current_candle_low, initial_tp_shorts)
@@ -102,7 +108,8 @@ def hourly_engulf_signals(
                     f"Time: {current_candle_time}\n"
                     f"Min: {current_candle_min_size}, Body: {current_candle_range}, Max: {current_candle_max_size}"
                 )
-                print('SEND BUY_STOP')
+                # print('SEND BUY_STOP')
+                print(Fore.GREEN + Style.BRIGHT + 'SEND BUY_STOP')
                 signal = f'100+{index}'
                 signals_counter += 1
                 side = 'long'
@@ -117,9 +124,10 @@ def hourly_engulf_signals(
 
             else:
                 print("RED candle size is not OK")
-
+                print(Fore.YELLOW + Style.BRIGHT + "RED candle size is not OK")
         if active_position():
-            print("Active position is open (longs)")
+            # print("Active position is open (longs)")
+            print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
             write_sl_tp(initial_tp_longs)
             print("SL and TP orders are written to file (longs)")
 
