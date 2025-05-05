@@ -143,10 +143,10 @@ def active_position():  # Read entry price from the active position file
 
 
 def write_sl_tp(tp, sl):    # Write stop loss and take profit to file
-    with open(tp_orders_file_path, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([tp])
-    print(f"[INFO] TP: {tp} written to {tp_orders_file_path}")
+    # with open(tp_orders_file_path, 'w', newline='') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow([tp])
+    # print(f"[INFO] TP: {tp} written to {tp_orders_file_path}")
 
     with open(sl_orders_file_path, 'w', newline='') as file:
         writer = csv.writer(file)
