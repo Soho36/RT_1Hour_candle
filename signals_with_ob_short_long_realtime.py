@@ -1,4 +1,4 @@
-from data_handling_realtime import active_position, write_sl_tp
+from data_handling_realtime import active_position, write_in_position_sl
 from colorama import Fore, Style, init
 
 
@@ -130,7 +130,7 @@ def hourly_engulf_signals(
         if active_position():
             # print("Active position is open (longs)")
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
-            write_sl_tp(initial_tp_longs, initial_sl_longs)
+            write_in_position_sl(initial_sl_longs)
             print("SL and TP orders are written to file (longs)")
 
     return (

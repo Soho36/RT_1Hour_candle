@@ -6,7 +6,8 @@ from data_handling_realtime import (
     # get_current_pending_order_direction,
     save_list_of_orders_to_file,
     get_position_state_longs,
-    get_position_state_shorts
+    get_position_state_shorts,
+    write_initial_sl
 )
 from colorama import Fore, Style, init
 
@@ -89,6 +90,7 @@ def send_buy_sell_orders(
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
+                        write_initial_sl(stop_loss_price)
                         # line_order_parameters_to_order_list = f'{n_index},Buy,{t_price},{s_time}'
                         line_order_parameters_to_order_list = f'{current_order_timestamp}'
                         print('line_order_parameters_to_order_list: ', line_order_parameters_to_order_list)
@@ -141,7 +143,7 @@ def send_buy_sell_orders(
 
                         print('Submitting new order: ', line_order_parameters_nt8)
                         save_order_parameters_to_file(line_order_parameters_nt8)
-
+                        write_initial_sl(stop_loss_price)
                         # line_order_parameters_to_order_list = f'{n_index},Sell,{t_price},{s_time}'
                         line_order_parameters_to_order_list = f'{current_order_timestamp}'
                         print('line_order_parameters_to_order_list: ', line_order_parameters_to_order_list)

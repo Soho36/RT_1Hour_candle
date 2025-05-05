@@ -29,7 +29,8 @@ current_order_direction_path = 'current_order_direction.txt'
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 active_position_file_path = f'active_position.csv'
 tp_orders_file_path = 'tp_orders.csv'
-sl_orders_file_path = 'sl_orders.csv'
+sl_initial_order_file_path = 'sl_order_initial.csv'
+sl_in_position_orders_file_path = 'sl_orders_inposition.csv'
 
 
 def leave_only_last_line():     # Clear file before starting the script
@@ -60,9 +61,13 @@ def set_position_state_to_closed_before_start(state):  # Called from orders_send
         file.write('')
         print(f"Clear tp_orders.csv before starting script")
 
-    with open(sl_orders_file_path, 'w', encoding='utf-8') as file:
+    with open(sl_in_position_orders_file_path, 'w', encoding='utf-8') as file:
         file.write('')
-        print(f"Clear sl_orders.csv before starting script")
+        print(f"Clear sl_orders_inposition.csv before starting script")
+
+    with open(sl_initial_order_file_path, 'w', encoding='utf-8') as file:
+        file.write('')
+        print(f"Clear sl_orders_initial.csv before starting script")
 
 
 def get_dataframe_from_file(max_time_waiting_for_entry):
@@ -142,13 +147,15 @@ def active_position():  # Read entry price from the active position file
     return None
 
 
-def write_sl_tp(tp, sl):    # Write stop loss and take profit to file
-    # with open(tp_orders_file_path, 'w', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow([tp])
-    # print(f"[INFO] TP: {tp} written to {tp_orders_file_path}")
-
-    with open(sl_orders_file_path, 'w', newline='') as file:
+def write_in_position_sl(sl):    # Write stop loss to file once position is opened
+    with open(sl_in_position_orders_file_path, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([sl])
-    print(f"[INFO] SL: {sl} written to {sl_orders_file_path}")
+    print(f"[INFO] SL(position): {sl} written to {sl_in_position_orders_file_path}")
+
+
+def write_initial_sl(sl):    # Write initial stop loss to file before position is opened
+    with open(sl_initial_order_file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([sl])
+    print(f"[INFO] SL(initial): {sl} written to {sl_in_position_orders_file_path}")
