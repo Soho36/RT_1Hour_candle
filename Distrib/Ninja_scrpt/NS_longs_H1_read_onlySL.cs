@@ -36,10 +36,6 @@ namespace NinjaTrader.NinjaScript.Strategies
 		[NinjaScriptProperty]
 		[Display(Name = "Position State File Path", Order = 2, GroupName = "File Paths")]
 		public string PositionStateFilePath { get; set; }
-		
-		[NinjaScriptProperty]
-		[Display(Name = "TP orders file path", Order = 3, GroupName = "File Paths")]
-		public string TPOrdersFilePath { get; set; }
 
 		[NinjaScriptProperty]
 		[Display(Name = "SL orders file path", Order = 4, GroupName = "File Paths")]
@@ -54,7 +50,6 @@ namespace NinjaTrader.NinjaScript.Strategies
 
 		private Order longOrder1;
 		
-		private Order tpOrder = null;
 		private Order slOrder = null;
 
 		private string lastPositionState = "closed"; // Tracks the last written position state
@@ -70,7 +65,6 @@ namespace NinjaTrader.NinjaScript.Strategies
             {	
 				SignalFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\trade_signal.txt";
 				PositionStateFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\active_position.csv";
-				TPOrdersFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\tp_orders.csv";
 				SLOrdersFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\sl_orders.csv";
 	
                 Name = "Filetransmit_LongOnly";
@@ -137,34 +131,24 @@ namespace NinjaTrader.NinjaScript.Strategies
 					{
 					    try
 					    {
-					        // Read TP and SL from files
-					        string tpText = File.ReadAllText(TPOrdersFilePath);
+					        // Read SL from files
 					        string slText = File.ReadAllText(SLOrdersFilePath);
 
-					        double takeProfitPrice = double.Parse(tpText, CultureInfo.InvariantCulture);
 					        double stopLossPrice = double.Parse(slText, CultureInfo.InvariantCulture);
 
 					        // Cancel existing orders if needed
-					        if (tpOrder != null && tpOrder.OrderState == OrderState.Working)
-					        {
-					            CancelOrder(tpOrder);
-					        }
 					        if (slOrder != null && slOrder.OrderState == OrderState.Working)
 					        {
 					            CancelOrder(slOrder);
 					        }
 
-					        // Submit OCO orders
-					        string ocoId = GetAtmStrategyUniqueId();
 
-					        tpOrder = ExitLongLimit(Position.Quantity, takeProfitPrice, "TP_Limit", ocoId);
-					        slOrder = ExitLongStopMarket(Position.Quantity, stopLossPrice, "SL_Stop", ocoId);
-					        if (tpOrder == null)
-							    Print($"[ERROR] TP order was not submitted. Value: {takeProfitPrice}, Position qty: {Position.Quantity}, OCO ID: {ocoId}");
+					        slOrder = ExitLongStopMarket(Position.Quantity, stopLossPrice, "SL_Stop", "");
+		
 							if (slOrder == null)
-							    Print($"[ERROR] SL order was not submitted. Value: {stopLossPrice}, Position qty: {Position.Quantity}, OCO ID: {ocoId}");
+							    Print($"[ERROR] SL order was not submitted. Value: {stopLossPrice}, Position qty: {Position.Quantity}");
 
-					        Print($"[OCO] Submitted TP at {takeProfitPrice} and SL at {stopLossPrice}");
+					        Print($"Submitted SL at {stopLossPrice}");
 					    }
 					    catch (Exception ex)
 					    {
