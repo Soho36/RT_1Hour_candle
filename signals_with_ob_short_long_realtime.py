@@ -69,8 +69,40 @@ def hourly_engulf_signals(
         initial_tp_shorts = current_candle_low - current_candle_range
         initial_sl_shorts = current_candle_high
 
-        # Check if current candle is GREEN:
-        if current_candle_close > current_candle_open:
+        # +------------------------------------------------------------------+
+        # LONGS
+        # +------------------------------------------------------------------+
+
+        if current_candle_close < current_candle_open:  # Check if current candle is RED:
+            if current_candle_max_size >= current_candle_range >= current_candle_min_size:
+                print(
+                    f"○ RED candle found at index {index}, candle size is OK, "
+                    f"Time: {current_candle_time}\n"
+                    f"Min: {current_candle_min_size}, Body: {current_candle_range}, Max: {current_candle_max_size}"
+                )
+                # print('SEND BUY_STOP')
+                print(Fore.GREEN + Style.BRIGHT + 'SEND BUY_STOP')
+                signal = f'100+{index}'
+                signals_counter += 1
+                side = 'long'
+
+                s_signal, n_index, t_price, s_time = signal_triggered_output(
+                    index,
+                    current_candle_time,
+                    current_candle_high,
+                    side,
+                    signal
+                )
+
+            else:
+                print("RED candle size is not OK")
+                print(Fore.YELLOW + Style.BRIGHT + "RED candle size is not OK")
+
+        # +------------------------------------------------------------------+
+        # SHORTS
+        # +------------------------------------------------------------------+
+
+        if current_candle_close > current_candle_open:  # Check if current candle is GREEN
             if current_candle_max_size >= current_candle_range >= current_candle_min_size:
                 print(
                     f"○ GREEN candle found at index {index}, candle size is OK, "
@@ -97,36 +129,6 @@ def hourly_engulf_signals(
                 # print("GREEN candle size is not OK")
                 print(Fore.YELLOW + Style.BRIGHT + "GREEN candle size is not OK")
 
-        # if active_position():
-        #     print("Active position is open (shorts)")
-        #     write_sl_tp(current_candle_low, initial_tp_shorts)
-        #     print("SL and TP orders are written to file (shorts)")
-
-        # IF FIRST CONDITION IS NOT TRUE THEN CANDLE IS RED, AND WE ARE LOOKING FOR LONGS:
-        else:
-            if current_candle_max_size >= current_candle_range >= current_candle_min_size:
-                print(
-                    f"○ RED candle found at index {index}, candle size is OK, "
-                    f"Time: {current_candle_time}\n"
-                    f"Min: {current_candle_min_size}, Body: {current_candle_range}, Max: {current_candle_max_size}"
-                )
-                # print('SEND BUY_STOP')
-                print(Fore.GREEN + Style.BRIGHT + 'SEND BUY_STOP')
-                signal = f'100+{index}'
-                signals_counter += 1
-                side = 'long'
-
-                s_signal, n_index, t_price, s_time = signal_triggered_output(
-                    index,
-                    current_candle_time,
-                    current_candle_high,
-                    side,
-                    signal
-                )
-
-            else:
-                print("RED candle size is not OK")
-                print(Fore.YELLOW + Style.BRIGHT + "RED candle size is not OK")
         if active_position():
             # print("Active position is open (longs)")
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")

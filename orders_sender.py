@@ -59,7 +59,7 @@ def send_buy_sell_orders(
     print(f'Time difference: {time_difference_current_time_order}')
 
     # +------------------------------------------------------------------+
-    # BUY ORDER
+    # BUY ORDERS
     # +------------------------------------------------------------------+
     if get_position_state_longs() == '' or get_position_state_longs() == 'closed' or get_position_state_shorts() == 'opened_short':
         if not pd.isna(current_order_timestamp):
@@ -110,7 +110,7 @@ def send_buy_sell_orders(
         print('Longs: There is an open long position. No new long signals...'.upper())
 
     # +------------------------------------------------------------------+
-    # SELL ORDER
+    # SELL ORDERS
     # +------------------------------------------------------------------+
     if get_position_state_shorts() == '' or get_position_state_shorts() == 'closed' or get_position_state_longs() == 'opened_long':
         if not pd.isna(current_order_timestamp):
