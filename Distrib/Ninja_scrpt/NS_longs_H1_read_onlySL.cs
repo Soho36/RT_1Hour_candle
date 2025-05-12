@@ -214,7 +214,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 			/* else if (Position.MarketPosition == MarketPosition.Short)
 				currentPositionState = "opened_short"; */
 			else
-				return; // Safety check, no action for unknown market position
+				return; // Skip if unknown state
 
 			// Write to the file only if the state has changed
 			if (currentPositionState != lastPositionState)
@@ -224,7 +224,24 @@ namespace NinjaTrader.NinjaScript.Strategies
 					File.WriteAllText(PositionStateFilePath, currentPositionState);
 					Print($"Position state updated: {currentPositionState}");
 					lastPositionState = currentPositionState; // Update the tracked state
+
+					// === ✅ New logic: place SL when long is opened ===
+					if (currentPositionState == "opened_long")
+					{
+						double slPrice = Low[1]; // Previous bar's low
+
+						// Cancel any existing SL first if needed
+						if (slOrder != null && slOrder.OrderState == OrderState.Working)
+						{
+							CancelOrder(slOrder);
+						}
+
+						slOrder = ExitLongStopMarket(Position.Quantity, slPrice, "SL_AfterEntry", "");
+						Print($"[SL SET] Stop-loss placed at previous bar low: {slPrice}");
+					}
 				}
+
+
 				catch (Exception ex)
 				{
 					Print($"Error writing position state to file: {ex.Message}");
