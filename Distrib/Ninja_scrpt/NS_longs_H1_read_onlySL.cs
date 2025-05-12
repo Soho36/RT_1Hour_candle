@@ -228,16 +228,13 @@ namespace NinjaTrader.NinjaScript.Strategies
 					// === ✅ New logic: place SL when long is opened ===
 					if (currentPositionState == "opened_long")
 					{
-						double slPrice = Low[1]; // Previous bar's low
+						double slPrice = GetLastRedCandleLow();
 
-						// Cancel any existing SL first if needed
 						if (slOrder != null && slOrder.OrderState == OrderState.Working)
-						{
 							CancelOrder(slOrder);
-						}
 
-						slOrder = ExitLongStopMarket(Position.Quantity, slPrice, "SL_AfterEntry", "");
-						Print($"[SL SET] Stop-loss placed at previous bar low: {slPrice}");
+						slOrder = ExitLongStopMarket(Position.Quantity, slPrice, "SL_LastRed", "");
+						Print($"[SL SET] Stop-loss placed at last red candle low: {slPrice}");
 					}
 				}
 
@@ -250,6 +247,21 @@ namespace NinjaTrader.NinjaScript.Strategies
 		}
 
 
+		private double GetLastRedCandleLow(int lookbackBars = 10)
+		{
+			for (int i = 1; i <= lookbackBars; i++) // Start from 1 to avoid the current forming bar
+			{
+				if (Close[i] < Open[i])
+				{
+					Print($"[INFO] Found red candle at bar index {i}, low: {Low[i]}");
+					return Low[i];
+				}
+			}
+			Print("[WARN] No red candle found in lookback range");
+			return Low[1]; // Fallback if no red candle is found
+		}
+	
+	
 		private void CancelAllOrders()
 		{
 			try
