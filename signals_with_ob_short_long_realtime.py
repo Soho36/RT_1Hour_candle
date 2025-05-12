@@ -63,10 +63,7 @@ def hourly_engulf_signals(
         current_candle_low = row['Low']
         current_candle_time = row['Time']
         current_candle_range = abs(current_candle_high - current_candle_low)
-        initial_tp_longs = current_candle_high + current_candle_range
-        initial_sl_longs = current_candle_low
-        initial_tp_shorts = current_candle_low - current_candle_range
-        initial_sl_shorts = current_candle_high
+        trailing_sl_for_longs = current_candle_low
 
         # +------------------------------------------------------------------+
         # LONGS
@@ -131,7 +128,7 @@ def hourly_engulf_signals(
         if active_position():
             # print("Active position is open (longs)")
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
-            write_sl_tp(initial_tp_longs, initial_sl_longs)
+            write_sl_tp(trailing_sl_for_longs)
             print("SL and TP orders are written to file (longs)")
 
     return (
