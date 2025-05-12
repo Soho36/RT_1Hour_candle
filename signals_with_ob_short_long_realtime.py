@@ -31,7 +31,6 @@ def hourly_engulf_signals(
     Returns True if the time limit is exceeded, otherwise False.
     """
 
-
     """
     Print triggered signals
     """

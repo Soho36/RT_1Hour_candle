@@ -61,7 +61,7 @@ def set_position_state_to_closed_before_start(state):  # Called from orders_send
         print(f"Clear tp_orders.csv before starting script")
 
     with open(sl_orders_file_path, 'w', encoding='utf-8') as file:
-        file.write('')
+        file.write('1000')
         print(f"Clear sl_orders.csv before starting script")
 
 
