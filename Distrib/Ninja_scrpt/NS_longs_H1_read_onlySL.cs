@@ -38,6 +38,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 		public string PositionStateFilePath { get; set; }
 
 		[NinjaScriptProperty]
+		[Display(Name = "Position Entry Price File Path", Order = 3, GroupName = "File Paths")]
+		public string PositionEntryPriceFilePath { get; set; }
+
+		[NinjaScriptProperty]
 		[Display(Name = "SL orders file path", Order = 4, GroupName = "File Paths")]
 		public string SLOrdersFilePath { get; set; }
 		
@@ -65,6 +69,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             {	
 				SignalFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\trade_signal.txt";
 				PositionStateFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\active_position.csv";
+				PositionEntryPriceFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\entry_price.csv";
 				SLOrdersFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\sl_orders.csv";
 	
                 Name = "Filetransmit_LongOnly";
@@ -220,10 +225,17 @@ namespace NinjaTrader.NinjaScript.Strategies
 			if (currentPositionState != lastPositionState)
 			{
 				try
-				{
+				{	// Write position state to file (closed or opened_long)
 					File.WriteAllText(PositionStateFilePath, currentPositionState);
 					Print($"Position state updated: {currentPositionState}");
+
+					// Write actual entry price to file (Culture-invariant formatting)
+		            string entryPriceText = Position.AveragePrice.ToString(CultureInfo.InvariantCulture);
+		            File.WriteAllText(PositionEntryPriceFilePath, entryPriceText);
+		            Print($"[ENTRY PRICE] Written to file: {entryPriceText}");	
+
 					lastPositionState = currentPositionState; // Update the tracked state
+
 
 					// === ✅ New logic: place SL when long is opened ===
 					if (currentPositionState == "opened_long")
