@@ -1,4 +1,4 @@
-from data_handling_realtime import active_position, write_sl_tp
+from data_handling_realtime import active_position, write_sl_tp, get_entry_price, get_initial_sl, save_ob_candle_ohlc
 from colorama import Fore, Style, init
 
 
@@ -16,7 +16,7 @@ def hourly_engulf_signals(
         # ob_candle_max_size,
         # ob_candle_min_size
 ):
-    # signals_threshold = 10
+
     n_index = None
     s_signal = None
     t_price = None
@@ -65,6 +65,23 @@ def hourly_engulf_signals(
         current_candle_range = abs(current_candle_high - current_candle_low)
         trailing_sl_for_longs = current_candle_low
 
+        if active_position():
+            print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
+            entry_price = get_entry_price()
+            initial_sl_longs = get_initial_sl()
+            risk_points = abs(entry_price - initial_sl_longs)
+
+            print(f'entry_price: {entry_price}'.upper())
+            print(f'initial_sl_longs: {initial_sl_longs}'.upper())
+            print(f'risk_points: {risk_points}'.upper())
+
+            if current_candle_close - entry_price > risk_points:
+                write_sl_tp(trailing_sl_for_longs)
+
+            else:
+                write_sl_tp(initial_sl_longs)
+                print("SL and TP orders are written to file (longs)")
+
         # +------------------------------------------------------------------+
         # LONGS
         # +------------------------------------------------------------------+
@@ -81,6 +98,9 @@ def hourly_engulf_signals(
                 signal = f'100+{index}'
                 signals_counter += 1
                 side = 'long'
+
+                # Save the candle data to a file
+                save_ob_candle_ohlc(current_candle_high, current_candle_low)
 
                 s_signal, n_index, t_price, s_time = signal_triggered_output(
                     index,
@@ -113,6 +133,9 @@ def hourly_engulf_signals(
                 signals_counter += 1
                 side = 'short'
 
+                # Save the candle data to a file
+                save_ob_candle_ohlc(current_candle_high, current_candle_low)
+
                 s_signal, n_index, t_price, s_time = signal_triggered_output(
                     index,
                     current_candle_time,
@@ -124,12 +147,6 @@ def hourly_engulf_signals(
             else:
                 # print("GREEN candle size is not OK")
                 print(Fore.YELLOW + Style.BRIGHT + "GREEN candle size is not OK")
-
-        if active_position():
-            # print("Active position is open (longs)")
-            print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
-            write_sl_tp(trailing_sl_for_longs)
-            print("SL and TP orders are written to file (longs)")
 
     return (
             s_signal,   # signal 100 or -100

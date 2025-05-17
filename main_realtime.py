@@ -4,7 +4,7 @@ import pandas as pd
 from data_handling_realtime import (get_dataframe_from_file,
                                     leave_only_last_line,
                                     get_last_order_time_from_file,
-                                    set_position_state_to_closed_before_start)
+                                    clear_files_before_start)
 from signals_with_ob_short_long_realtime import hourly_engulf_signals
 from orders_sender import last_candle_ohlc, send_buy_sell_orders
 from watchdog.observers import Observer
@@ -52,7 +52,7 @@ if clear_csv_before_start:
     leave_only_last_line()
     print('Csv first lines cleared before starting script'.upper())
 
-set_position_state_to_closed_before_start('closed')  # Set position state to closed before starting script
+clear_files_before_start('closed')  # Set position state to closed before starting script
 
 
 class CsvChangeHandler(FileSystemEventHandler):
