@@ -28,7 +28,7 @@ tp_orders_file_path = 'tp_orders.csv'
 sl_orders_file_path = 'sl_orders.csv'
 sl_initial_order_file_path = 'sl_order_initial.csv'
 entry_price_file_path = 'entry_price.csv'
-ob_candle_file_path = 'OB_candle_OHLC.csv'
+ob_candle_file_path = 'OB_candle_HL.csv'
 
 
 def leave_only_last_line():     # Clear file before starting the script
@@ -73,7 +73,7 @@ def clear_files_before_start(state):  # Called from orders_sender.py
 
     with open(ob_candle_file_path, 'w', encoding='utf-8') as file:
         file.write('')
-        print(f"Clear OB_candle_OHLC.csv before starting script")
+        print(f"Clear OB_candle_HL.csv before starting script")
 
 
 def get_dataframe_from_file(max_time_waiting_for_entry):
@@ -144,7 +144,7 @@ def get_last_order_time_from_file():
         return last_order_timestamp
 
 
-def active_position():  # Read entry price from the active position file
+def active_position():  # Read position state from the active position file
     with open(active_position_file_path, 'r') as file:
         reader = csv.reader(file)
         rows = list(reader)
@@ -162,15 +162,22 @@ def get_entry_price():  # Read entry price from entry_price.csv
     return None
 
 
-def save_ob_candle_ohlc(hi, lo):  # Save OB candle OHLC to file
-    with open(ob_candle_file_path, 'w', encoding='utf-8') as file:
+# def save_ob_candle_ohlc(hi, lo):  # Save OB candle OHLC to file
+#     with open(ob_candle_file_path, 'w', encoding='utf-8') as file:
+#         writer = csv.writer(file)
+#         writer.writerow([hi, lo])
+#         print(f"OB candle HIGH/LOW ({hi, lo}) is saved to {ob_candle_file_path}")
+
+
+def save_ob_candle_ohlc(lo):  # Save OB candle OHLC to file
+    with open(ob_candle_file_path, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow([hi, lo])
-        print(f"OB candle OHLC ({hi, lo}) is saved to {ob_candle_file_path}")
+        writer.writerow([lo])
+        print(f"OB candle LOW ({lo}) is saved to {ob_candle_file_path}")
 
 
 def get_initial_sl():  # Read initial stop loss from sl_order_initial.csv
-    with open(sl_initial_order_file_path, 'r') as file:
+    with open(ob_candle_file_path, 'r') as file:
         reader = csv.reader(file)
         rows = list(reader)
         if rows:

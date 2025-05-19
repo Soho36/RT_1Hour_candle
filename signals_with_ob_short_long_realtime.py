@@ -65,7 +65,7 @@ def hourly_engulf_signals(
         current_candle_range = abs(current_candle_high - current_candle_low)
         trailing_sl_for_longs = current_candle_low
 
-        if active_position():
+        if active_position() == 'opened_long':
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
             entry_price = get_entry_price()
             initial_sl_longs = get_initial_sl()
@@ -100,7 +100,9 @@ def hourly_engulf_signals(
                 side = 'long'
 
                 # Save the candle data to a file
-                save_ob_candle_ohlc(current_candle_high, current_candle_low)
+                if active_position() != 'opened_long':
+                    print("There is no active position, OB candle low is saved")
+                    save_ob_candle_ohlc(current_candle_low)
 
                 s_signal, n_index, t_price, s_time = signal_triggered_output(
                     index,
@@ -134,7 +136,8 @@ def hourly_engulf_signals(
                 side = 'short'
 
                 # Save the candle data to a file
-                save_ob_candle_ohlc(current_candle_high, current_candle_low)
+                # if not active_position():
+                #     save_ob_candle_ohlc(current_candle_high)
 
                 s_signal, n_index, t_price, s_time = signal_triggered_output(
                     index,
