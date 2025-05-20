@@ -61,7 +61,7 @@ class CsvChangeHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         global buy_signal_flag, sell_signal_flag, last_signal
-        # print(f"File modified: {event.src_path}")  # This should print on any modification
+
         if not event.src_path == os.path.join(base_path, file):  # CSV file path
             return
         print("CSV file updated; triggering function calls...")

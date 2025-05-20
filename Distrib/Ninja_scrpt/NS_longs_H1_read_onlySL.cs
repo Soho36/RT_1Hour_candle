@@ -44,6 +44,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 		[NinjaScriptProperty]
 		[Display(Name = "SL orders file path", Order = 4, GroupName = "File Paths")]
 		public string SLOrdersFilePath { get; set; }
+
+		[NinjaScriptProperty]
+		[Display(Name = "OB Candle H/L File Path", Order = 5, GroupName = "File Paths")]
+		public string OBCandleHighLowPath { get; set; }	
 		
 		private bool executeLongTrade = false;
 
@@ -71,6 +75,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 				PositionStateFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\active_position.csv";
 				PositionEntryPriceFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\entry_price.csv";
 				SLOrdersFilePath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\sl_orders.csv";
+				OBCandleHighLowPath = @"C:\Users\Liikurserv\PycharmProjects\RT_1Hour_candle\OB_candle_HL.csv";
 	
                 Name = "Filetransmit_LongOnly";
                 Calculate = Calculate.OnEachTick;
@@ -237,7 +242,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 					lastPositionState = currentPositionState; // Update the tracked state
 
 
-					// === ✅ New logic: place SL when long is opened ===
+					// ✅ Place SL when long is opened
 					if (currentPositionState == "opened_long")
 					{
 						double slPrice = GetLastRedCandleLow();
@@ -248,8 +253,14 @@ namespace NinjaTrader.NinjaScript.Strategies
 						slOrder = ExitLongStopMarket(Position.Quantity, slPrice, "SL_LastRed", "");
 						Print($"[SL SET] Stop-loss placed at last red candle low: {slPrice}");
 					}
-				}
 
+					// ✅ Clear OB candle file when position is closed
+			        if (currentPositionState == "closed")
+			        {
+			            File.WriteAllText(OBCandleHighLowPath, "");
+			            Print($"[INFO] OB Candle file {OBCandleHighLowPath} cleared.");
+			        }
+				}
 
 				catch (Exception ex)
 				{
