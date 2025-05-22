@@ -63,7 +63,8 @@ def hourly_engulf_signals(
         current_candle_low = row['Low']
         current_candle_time = row['Time']
         current_candle_range = abs(current_candle_high - current_candle_low)
-        trailing_sl_for_longs = current_candle_low
+        # trailing_sl_for_longs = current_candle_low
+        flatten_at_candle_close = current_candle_close - 2
 
         if active_position() == 'opened_long':
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
@@ -76,7 +77,7 @@ def hourly_engulf_signals(
             print(f'risk_points: {risk_points}'.upper())
 
             if current_candle_close - entry_price > risk_points:
-                write_sl_tp(trailing_sl_for_longs)
+                write_sl_tp(flatten_at_candle_close)
 
             else:
                 write_sl_tp(initial_sl_longs)

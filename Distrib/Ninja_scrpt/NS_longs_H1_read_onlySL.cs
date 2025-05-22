@@ -138,6 +138,8 @@ namespace NinjaTrader.NinjaScript.Strategies
 					}
 					// Only proceed if a position is open
 					if (Position.MarketPosition != MarketPosition.Flat)
+
+					for (int i = 0; i < 5; i++) // 5 attempts to read if file is locked by python
 					{
 					    try
 					    {
@@ -157,8 +159,9 @@ namespace NinjaTrader.NinjaScript.Strategies
 		
 							if (slOrder == null)
 							    Print($"[ERROR] SL order was not submitted. Value: {stopLossPrice}, Position qty: {Position.Quantity}");
-
-					        Print($"Submitted SL at {stopLossPrice}");
+							else    	
+					        	Print($"Submitted SL at {stopLossPrice}");
+					        break;	// ✅ Exit loop if success
 					    }
 					    catch (Exception ex)
 					    {
@@ -260,6 +263,14 @@ namespace NinjaTrader.NinjaScript.Strategies
 			            File.WriteAllText(OBCandleHighLowPath, "");
 			            Print($"[INFO] OB Candle file {OBCandleHighLowPath} cleared.");
 			        }
+
+			        // ✅ Clear sl_orders.csv file when position is closed
+			        if (currentPositionState == "closed")
+			        {
+			            File.WriteAllText(SLOrdersFilePath, "");
+			            Print($"[INFO] sl_orders.csv file {SLOrdersFilePath} cleared.");
+			        }		
+
 				}
 
 				catch (Exception ex)
