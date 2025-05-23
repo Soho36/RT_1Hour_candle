@@ -138,37 +138,37 @@ namespace NinjaTrader.NinjaScript.Strategies
 					}
 					// Only proceed if a position is open
 					if (Position.MarketPosition != MarketPosition.Flat)
+					{	
+						for (int i = 0; i < 5; i++) // 5 attempts to read if file is locked by python
+						{
+						    try
+						    {
+						        // Read SL from files
+						        string slText = File.ReadAllText(SLOrdersFilePath);
 
-					for (int i = 0; i < 5; i++) // 5 attempts to read if file is locked by python
-					{
-					    try
-					    {
-					        // Read SL from files
-					        string slText = File.ReadAllText(SLOrdersFilePath);
+						        double stopLossPrice = double.Parse(slText, CultureInfo.InvariantCulture);
 
-					        double stopLossPrice = double.Parse(slText, CultureInfo.InvariantCulture);
-
-					        // Cancel existing orders if needed
-					        if (slOrder != null && slOrder.OrderState == OrderState.Working)
-					        {
-					            CancelOrder(slOrder);
-					        }
+						        // Cancel existing orders if needed
+						        if (slOrder != null && slOrder.OrderState == OrderState.Working)
+						        {
+						            CancelOrder(slOrder);
+						        }
 
 
-					        slOrder = ExitLongStopMarket(Position.Quantity, stopLossPrice, "SL_Stop", "");
-		
-							if (slOrder == null)
-							    Print($"[ERROR] SL order was not submitted. Value: {stopLossPrice}, Position qty: {Position.Quantity}");
-							else    	
-					        	Print($"Submitted SL at {stopLossPrice}");
-					        break;	// ✅ Exit loop if success
-					    }
-					    catch (Exception ex)
-					    {
-					        Print($"[ERROR] Reading TP/SL file: {ex.Message}");
-					    }
+						        slOrder = ExitLongStopMarket(Position.Quantity, stopLossPrice, "SL_Stop", "");
+			
+								if (slOrder == null)
+								    Print($"[ERROR] SL order was not submitted. Value: {stopLossPrice}, Position qty: {Position.Quantity}");
+								else    	
+						        	Print($"Submitted SL at {stopLossPrice}");
+						        break;	// ✅ Exit loop if success
+						    }
+						    catch (Exception ex)
+						    {
+						        Print($"[ERROR] Reading TP/SL file: {ex.Message}");
+						    }
+						}
 					}
-
 				}
 				catch (Exception ex)
 				{
