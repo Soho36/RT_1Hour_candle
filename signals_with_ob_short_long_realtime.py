@@ -64,16 +64,24 @@ def hourly_engulf_signals(
         current_candle_time = row['Time']
         current_candle_range = abs(current_candle_high - current_candle_low)
         # trailing_sl_for_longs = current_candle_low
-        flatten_at_candle_close = current_candle_close - 2
+        flatten_at_candle_close = current_candle_close
 
         if active_position() == 'opened_long':
             print(Fore.GREEN + Style.DIM + "Active position is open (longs)")
             entry_price = get_entry_price()
             initial_sl_longs = get_initial_sl()
-            risk_points = abs(entry_price - initial_sl_longs)
-
             print(f'entry_price: {entry_price}'.upper())
             print(f'initial_sl_longs: {initial_sl_longs}'.upper())
+
+            try:
+                risk_points = abs(entry_price - initial_sl_longs)
+
+            except TypeError:
+                write_sl_tp(flatten_at_candle_close)
+                print(f"TypeError: {entry_price} or {initial_sl_longs} is None")
+                print(Fore.RED + Style.DIM + "Flattening position because of error".upper())
+                risk_points = 0
+
             print(f'risk_points: {risk_points}'.upper())
 
             if current_candle_close - entry_price > risk_points:
