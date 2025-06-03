@@ -63,6 +63,12 @@ namespace NinjaTrader.NinjaScript.Strategies
 		private string lastPositionState = "closed"; // Tracks the last written position state
 		private bool hasPrintedEmptySignalMessage = false; // Flag to track if the empty signal message has been printed
 		private bool hasPrintedExceptionMessage = false; // Flag to track if the empty signal message has been printed
+		private bool hasPrintedSLSubmittedMessage = false;
+		private bool hasPrintedSLFailureMessage = false;
+		private bool hasPrintedSLWarningMessage = false;
+		private bool hasPrintedFileErrorMessage = false;
+		private double lastSubmittedSL = 0;
+
 		
 		// Declare a Dictionary to Track Order Ages
 		private Dictionary<string, int> orderCreationCandle = new Dictionary<string, int>();
@@ -100,7 +106,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 					{
 						if (!hasPrintedEmptySignalMessage)
 						{
-							Print("Signal file is empty. No action will be taken.");
+							Print($"[{DateTime.Now:HH:mm:ss}] Signal file is empty. No action will be taken.");
 							hasPrintedEmptySignalMessage = true; // Set the flag to true after printing
 						}
 						return; // Exit early if the file is empty
@@ -112,12 +118,12 @@ namespace NinjaTrader.NinjaScript.Strategies
 					if (signal.Equals("Cancel", StringComparison.OrdinalIgnoreCase))
 					{
 						CancelAllOrders();
-						Print("Received Cancel signal. All active orders have been cancelled.");
+						Print($"[{DateTime.Now:HH:mm:ss}] Received Cancel signal. All active orders have been cancelled.");
 						File.WriteAllText(SignalFilePath, string.Empty); // Clear the signal file
 						return; // Exit early as no further action is needed
 					}
 					if (parts.Length == 6)
-						Print($"Signal file content: {signal}");
+						Print($"[{DateTime.Now:HH:mm:ss}] Signal file content: {signal}");
 					{
 						string tradeDirection = parts[0].Trim();                    // Direction
 						if (
@@ -138,53 +144,76 @@ namespace NinjaTrader.NinjaScript.Strategies
 					}
 					// Only proceed if a position is open
 					if (Position.MarketPosition != MarketPosition.Flat)
-					{	
-						for (int i = 0; i < 5; i++) // 5 attempts to read if file is locked by python
+					{
+						for (int i = 0; i < 5; i++)
 						{
 							try
 							{
-								// Read SL from file
 								string slText = File.ReadAllText(SLOrdersFilePath);
 								double stopLossPrice = double.Parse(slText, CultureInfo.InvariantCulture);
 
-								// Cancel existing SL order if needed
 								if (slOrder != null && slOrder.OrderState == OrderState.Working)
-								{
 									CancelOrder(slOrder);
+
+								// Reset flags if SL changed
+								if (stopLossPrice != lastSubmittedSL)
+								{
+									lastSubmittedSL = stopLossPrice;
+									hasPrintedSLSubmittedMessage = false;
+									hasPrintedSLFailureMessage = false;
+									hasPrintedSLWarningMessage = false;
 								}
 
-								// Main SL logic
 								if (stopLossPrice < GetCurrentBid())
 								{
 									slOrder = ExitLongStopMarket(Position.Quantity, stopLossPrice, "SL_Stop", "");
-									
-									if (slOrder != null)
-										Print($"[✅ SL SUBMITTED] {stopLossPrice}");
-									else
-										Print($"[❌ ERROR] SL order was not submitted. Value: {stopLossPrice}, Qty: {Position.Quantity}");
-								}
-								else
-								{
-									Print($"[⚠️ WARNING] SL not submitted — SL {stopLossPrice} > market {GetCurrentBid()}. Closing position at market.");
-									ExitLong("ForceClose_Long");
-								}
 
-								break; // Exit loop after successful read
+									if (slOrder != null)
+									{
+										if (!hasPrintedSLSubmittedMessage)
+										{
+											Print($"[{DateTime.Now:HH:mm:ss}][✅ SL SUBMITTED] {stopLossPrice}");
+											hasPrintedSLSubmittedMessage = true;
+										}
+									}
+									else
+									{
+										if (!hasPrintedSLFailureMessage)
+										{
+											Print($"[{DateTime.Now:HH:mm:ss}][❌ ERROR] SL order was not submitted. Value: {stopLossPrice}, Qty: {Position.Quantity}");
+											hasPrintedSLFailureMessage = true;
+										}
+									}
+								}
+								
 							}
 							catch (Exception ex)
 							{
-								Print($"[❌ ERROR] Reading TP/SL file: {ex.Message}");
-								// Consider adding Thread.Sleep(10); here if file lock is common
+								if (!hasPrintedFileErrorMessage)
+								{
+									Print($"[{DateTime.Now:HH:mm:ss}][❌ ERROR] Reading TP/SL file: {ex.Message}");
+									hasPrintedFileErrorMessage = true;
+								}
+								// Optional small delay to give Python time
+								// Thread.Sleep(10);
 							}
 						}
 					}
-
+					else
+					{
+						// Reset all flags when flat
+						hasPrintedSLSubmittedMessage = false;
+						hasPrintedSLFailureMessage = false;
+						hasPrintedSLWarningMessage = false;
+						hasPrintedFileErrorMessage = false;
+						lastSubmittedSL = 0;
+					}
 				}
 				catch (Exception ex)
 				{
 					if (!hasPrintedExceptionMessage)
 						{
-							Print($"Error reading signal file: {ex.Message}");
+							Print($"[{DateTime.Now:HH:mm:ss}]Error reading signal file: {ex.Message}");
 							hasPrintedExceptionMessage = true; // Set the flag to true after printing
 						}
 						return; // Exit early if the file is empty
@@ -202,7 +231,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 					{
 						if (entryPriceLongOnly <= GetCurrentAsk())
 						{
-							Print("Error: Buy stop order price must be above the current market price.");
+							Print($"[{DateTime.Now:HH:mm:ss}] Error: Buy stop order price must be above the current market price.");
 							executeLongTrade = false; // Reset flag
 							return; // Exit without placing the order
 						}
@@ -211,12 +240,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                         orderCreationCandle[longOrder1.OrderId] = CurrentBar; // Track candle index for the order
 						// SetStopLoss("Long1", CalculationMode.Price, stopPrice, false);
 						// SetProfitTarget("Long1", CalculationMode.Price, targetPrice1);
-						Print($"1-st LONG stop-market order placed at {entryPriceLongOnly} with TP1: no TP, SL: {stopPrice}");
+						Print($"[{DateTime.Now:HH:mm:ss}] 1-st LONG stop-market order placed at {entryPriceLongOnly} with TP1: no TP, SL: {stopPrice}");
 					}
 				}
 				catch (Exception ex)
 				{
-					Print($"Error placing long orders: {ex.Message}");
+					Print($"[{DateTime.Now:HH:mm:ss}] Error placing long orders: {ex.Message}");
 				}
 				executeLongTrade = false; // Reset flag
 			}
@@ -245,12 +274,12 @@ namespace NinjaTrader.NinjaScript.Strategies
 				try
 				{	// Write position state to file (closed or opened_long)
 					File.WriteAllText(PositionStateFilePath, currentPositionState);
-					Print($"Position state updated: {currentPositionState}");
+					Print($"[{DateTime.Now:HH:mm:ss}] Position state updated: {currentPositionState}");
 
 					// Write actual entry price to file (Culture-invariant formatting)
 		            string entryPriceText = Position.AveragePrice.ToString(CultureInfo.InvariantCulture);
 		            File.WriteAllText(PositionEntryPriceFilePath, entryPriceText);
-		            Print($"[ENTRY PRICE] Written to file: {entryPriceText}");	
+		            Print($"[{DateTime.Now:HH:mm:ss}] [ENTRY PRICE] Written to file: {entryPriceText}");	
 
 					lastPositionState = currentPositionState; // Update the tracked state
 
@@ -264,28 +293,28 @@ namespace NinjaTrader.NinjaScript.Strategies
 							CancelOrder(slOrder);
 
 						slOrder = ExitLongStopMarket(Position.Quantity, slPrice, "SL_LastRed", "");
-						Print($"[SL SET] Stop-loss placed at last red candle low: {slPrice}");
+						Print($"[{DateTime.Now:HH:mm:ss}] [SL SET] Stop-loss placed at last red candle low: {slPrice}");
 					}
 
 					// ✅ Clear OB candle file when position is closed
 			        if (currentPositionState == "closed")
 			        {
 			            File.WriteAllText(OBCandleHighLowPath, "");
-			            Print($"[INFO] OB Candle file {OBCandleHighLowPath} cleared.");
+			            Print($"[{DateTime.Now:HH:mm:ss}] [INFO] OB Candle file {OBCandleHighLowPath} cleared.");
 			        }
 
 			        // ✅ Clear sl_orders.csv file when position is closed
 			        if (currentPositionState == "closed")
 			        {
 			            File.WriteAllText(SLOrdersFilePath, "");
-			            Print($"[INFO] sl_orders.csv file {SLOrdersFilePath} cleared.");
+			            Print($"[{DateTime.Now:HH:mm:ss}] [INFO] sl_orders.csv file {SLOrdersFilePath} cleared.");
 			        }		
 
 				}
 
 				catch (Exception ex)
 				{
-					Print($"Error writing position state to file: {ex.Message}");
+					Print($"[{DateTime.Now:HH:mm:ss}] Error writing position state to file: {ex.Message}");
 				}
 			}
 		}
@@ -297,11 +326,11 @@ namespace NinjaTrader.NinjaScript.Strategies
 			{
 				if (Close[i] < Open[i])
 				{
-					Print($"[INFO] Found red candle at bar index {i}, low: {Low[i]}");
+					Print($"[{DateTime.Now:HH:mm:ss}] [INFO] Found red candle at bar index {i}, low: {Low[i]}");
 					return Low[i];
 				}
 			}
-			Print("[WARN] No red candle found in lookback range");
+			Print($"[{DateTime.Now:HH:mm:ss}] [WARN] No red candle found in lookback range");
 			return Low[1]; // Fallback if no red candle is found
 		}
 	
@@ -316,13 +345,13 @@ namespace NinjaTrader.NinjaScript.Strategies
 					if ((order.OrderState == OrderState.Working || order.OrderState == OrderState.Accepted))
 					{
 						CancelOrder(order);
-						Print($"Cancelled order: {order.Name}");
+						Print($"[{DateTime.Now:HH:mm:ss}] Cancelled order: {order.Name}");
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Print($"Error canceling orders: {ex.Message}");
+				Print($"[{DateTime.Now:HH:mm:ss}] Error canceling orders: {ex.Message}");
 			}
 		}
 
@@ -350,7 +379,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 							if (candleAge > maxCandleAge)
 							{
 								ordersToCancel.Add(order.OrderId);
-								Print($"Order {order.Name} is {candleAge} candles old and will be canceled.");
+								Print($"[{DateTime.Now:HH:mm:ss}] [{DateTime.Now:HH:mm:ss}] Order {order.Name} is {candleAge} candles old and will be canceled.");
 							}
 						}
 					}
@@ -363,14 +392,14 @@ namespace NinjaTrader.NinjaScript.Strategies
 					if (orderToCancel != null)
 					{
 						CancelOrder(orderToCancel);
-						Print($"Cancelled order: {orderToCancel.Name} due to time limit threshold");
+						Print($"[{DateTime.Now:HH:mm:ss}] Cancelled order: {orderToCancel.Name} due to time limit threshold");
 						orderCreationCandle.Remove(orderId); // Remove from tracking
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Print($"Error in CancelOldOrders: {ex.Message}");
+				Print($"[{DateTime.Now:HH:mm:ss}] Error in CancelOldOrders: {ex.Message}");
 			}
 		}
     }
