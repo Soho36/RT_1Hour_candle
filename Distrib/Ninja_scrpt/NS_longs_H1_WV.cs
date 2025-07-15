@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
+using System.Threading;
 using System.Globalization;
 using NinjaTrader.Cbi;
 using NinjaTrader.Gui;
@@ -195,7 +196,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 									hasPrintedFileErrorMessage = true;
 								}
 								// Optional small delay to give Python time
-								// Thread.Sleep(10);
+								Thread.Sleep(100);
 							}
 						}
 					}
